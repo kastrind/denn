@@ -1,10 +1,6 @@
 //var neuralnet = require('./NeuralNetwork');
-import * as neuralnet from './NeuralNetwork';
+import {NeuralNetwork} from './NeuralNetwork';
 
-// let X = [[0,0,1],
-//      [0,1,1],
-//      [1,0,1],
-//      [1,1,1]];
 let X = [[1,0,1],
         [0,1,1],
         [1,0,1],
@@ -13,9 +9,7 @@ let X = [[1,0,1],
         [1,1,0]];
 let y = [[1],[0],[1],[0],[0],[0]];
 let formation = [15];
-var nn = new neuralnet.NeuralNetwork(X, y, formation);
-
-nn.initLayers(formation);
+var nn = new NeuralNetwork(X, y, formation);
 
 //nn.train(500, X, y);
 for (var i=0; i<5000; i++) {
