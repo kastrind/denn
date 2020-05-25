@@ -20,6 +20,7 @@ export class NeuralNetwork {
         this.output = 0;
         this.layers = [];
         this.formation = formation;
+        this.formationReversed = formation.slice().reverse();
         this.initLayers();
     }
 
@@ -28,100 +29,16 @@ export class NeuralNetwork {
         if (this.initialized === true) return;
         for (var i=0; i<this.formation.length; i++) {
             if (i==0) {
-                this.layers.push({"weights": math.random([this.input[0].length, this.formation[i]]), "layer": 0});
-            }else if (i<this.formation.length-1) {
-                this.layers.push({"weights": math.random([this.formation[i-1], this.formation[i]]), "layer": 0});
+                this.layers.push({"weights": math.random([this.input[0].length, this.formation[i].neurons]), "layer": [], "weights_copy": [], "layer_copy": [], "dropped_out_i": []});
+            }else if (i<=this.formation.length-1) {
+                this.layers.push({"weights": math.random([this.formation[i-1].neurons, this.formation[i].neurons]), "layer": [], "weights_copy": [], "layer_copy": [], "dropped_out_i": []});
             } 
             if (i==this.formation.length-1) {
-                this.layers.push({"weights": math.random([this.formation[i], this.Y[0].length])});
+                this.layers.push({"weights": math.random([this.formation[i].neurons, this.Y[0].length]), "weights_copy": []});
             }
         }
         this.initialized = true;
         //this.printLayers();
-    }
-
-    printLayers() {
-        for(var i=0; i<this.layers.length; i++) {
-            console.log("LAYER "+i+":");
-            console.log("WEIGHTS:");
-            for(var j=0; j<this.layers[i].weights.length; j++) {
-                console.log(this.layers[i].weights[j]);
-            }
-            console.log("ACTIVATIONS:");
-            console.log(this.layers[i].layer);
-            console.log("END OF LAYER "+i);
-        }
-    }
-
-    dropout(layer_i, p) {
-        if (p==0) return;
-
-        let dropped_out_i = [];
-        for (var i=0; i<this.layers[layer_i].weights[0].length; i++) {
-            if (Math.random() <= p) {
-                dropped_out_i.push(i);
-            }
-            if (dropped_out_i.length == this.layers[layer_i].weights[0].length -1) break;
-        }
-        if (dropped_out_i.length==0) return;
-        this.layers[layer_i].dropped_out_i = dropped_out_i;
-        dropped_out_i.sort(function(a, b){return b-a});
-        //console.log(dropped_out_i);
-
-        this.layers[layer_i].weights_copy = JSON.parse(JSON.stringify(this.layers[layer_i].weights));
-        this.layers[layer_i].layer_copy = this.layers[layer_i].layer ? JSON.parse(JSON.stringify(this.layers[layer_i].layer)) : 0;
-        this.layers[layer_i+1].weights_copy = JSON.parse(JSON.stringify(this.layers[layer_i+1].weights));
-        
-        let that = this;
-        dropped_out_i.forEach(function(i) {
-            that.layers[layer_i].weights.forEach( function(w){w.splice(i, 1);});
-            if (that.layers[layer_i].layer) {
-                //that.layers[layer_i].layer.splice(i, 1);
-                that.layers[layer_i].layer.forEach( function(w){w.splice(i, 1);});
-            }
-            that.layers[layer_i+1].weights.splice(i, 1);
-        });
-
-        //console.log(this.layers[layer_i])
-        return dropped_out_i;
-    }
-
-    dropout_restore(layer_i) {
-        if (!this.layers[layer_i].dropped_out_i) return;
-
-        for (var i=0; i<this.layers[layer_i].weights_copy.length; i++) {
-            for (var j=0; j<this.layers[layer_i].weights_copy[i].length; j++) {
-                if (this.layers[layer_i].dropped_out_i.includes(j)) continue;
-                else this.layers[layer_i].weights_copy[i][j] = this.layers[layer_i].weights[i].shift();  
-            }
-        }
-        for (var i=0; i<this.layers[layer_i].layer_copy.length; i++) {
-            for (var j=0; j<this.layers[layer_i].layer_copy[i].length; j++) {
-                if (this.layers[layer_i].dropped_out_i.includes(j)) continue;
-                else this.layers[layer_i].layer_copy[i][j] = this.layers[layer_i].layer[i].shift();  
-            }
-        }
-        if (this.layers[layer_i].layer_copy) {
-            for (var j=0; j<this.layers[layer_i].layer_copy.length; j++) {
-                if (this.layers[layer_i].dropped_out_i.includes(j)) continue;
-                else this.layers[layer_i].layer_copy[j] = this.layers[layer_i].layer.shift();  
-            }
-        }
-        for (var j=0; j<this.layers[layer_i+1].weights_copy.length; j++) {
-            if (this.layers[layer_i].dropped_out_i.includes(j)) continue;
-            else this.layers[layer_i+1].weights_copy[j] = this.layers[layer_i+1].weights.shift();  
-        }
-
-        this.layers[layer_i].weights = this.layers[layer_i].weights_copy;
-        this.layers[layer_i].layer = this.layers[layer_i].layer_copy;
-        this.layers[layer_i+1].weights = this.layers[layer_i+1].weights_copy;
-        this.dropped_out_i = [];
-        //console.log(this.layers[0]);
-    }
-    
-    sigmoid(z) {
-        var bottom = math.add(1, math.exp(math.multiply(-1, z)));
-        return math.dotDivide(1, bottom);
     }
 
     sigmoid_d(z) {
@@ -142,11 +59,7 @@ export class NeuralNetwork {
                 this.layers[i].error = math.subtract(this.Y, this.output);
                 this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => this.sigmoid_d(v)));
             }
-            else if (i==0) {
-                this.layers[i].error = math.multiply(this.layers[i+1].delta, math.transpose(this.layers[i+1].weights));
-                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.layers[i].layer.map(v => this.sigmoid_d(v))) ;
-            }
-            else if (i<this.layers.length-1) {
+            else if (i<this.layers.length-1 || i==0) {
                 this.layers[i].error = math.multiply(this.layers[i+1].delta, math.transpose(this.layers[i+1].weights));
                 this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.layers[i].layer.map(v => this.sigmoid_d(v))) ;
             }
@@ -156,7 +69,105 @@ export class NeuralNetwork {
             this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), this.layers[i].delta));
         }
         this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), this.layers[0].delta));
-        //console.log(this.layers)
+    }
+
+    dropout() {
+        let that = this;
+        this.formation.forEach(function(layer, i) {
+            that.dropoutLayer(i, layer.dropout);
+        });
+    }
+
+    dropoutLayer(layer_i, p) {
+        if (p==0) return;
+
+        let dropped_out_i = [];
+        //determine the indices of the layer to ignore based on given probability
+        for (var i=0; i<this.layers[layer_i].weights[0].length; i++) {
+            if (Math.random() <= p) {
+                dropped_out_i.push(i);
+            }
+            if (dropped_out_i.length == this.layers[layer_i].weights[0].length -1) break;
+        }
+
+        dropped_out_i.sort(function(a, b){return b-a});
+        this.layers[layer_i].dropped_out_i = dropped_out_i;
+
+        //back-up the original layer
+        this.layers[layer_i].weights_copy.push(JSON.parse(JSON.stringify(this.layers[layer_i].weights)));
+        this.layers[layer_i].layer_copy = (JSON.parse(JSON.stringify(this.layers[layer_i].layer)));
+        this.layers[layer_i+1].weights_copy.push(JSON.parse(JSON.stringify(this.layers[layer_i+1].weights)));
+        
+        let that = this;
+        //perform the drop-out on the layer
+        dropped_out_i.forEach(function(i) {
+            that.layers[layer_i].weights.forEach( function(w){w.splice(i, 1);});
+            that.layers[layer_i].layer.forEach( function(w){w.splice(i, 1);});
+            that.layers[layer_i+1].weights.splice(i, 1);
+        });
+    }
+
+    dropoutRestore() {
+        let that = this;
+        let layer_i = this.formation.length-1;
+        this.formationReversed.forEach(function(layer) {
+            if (layer.dropout>0) that.dropoutRestoreLayer(layer_i);
+            layer_i -= 1;
+        });
+    }
+
+    dropoutRestoreLayer(layer_i) {
+        if (!this.layers[layer_i].dropped_out_i) return;
+
+        let dropped_out_i = this.layers[layer_i].dropped_out_i;
+
+        //update the original incoming weights of the given layer with the weights that were NOT dropped-out
+        let last_w_c = this.layers[layer_i].weights_copy.pop();
+        for (var i=0; i<last_w_c.length; i++) {
+            for (var j=0; j<last_w_c[i].length; j++) {
+                if (dropped_out_i.includes(j)) continue;
+                else last_w_c[i][j] = this.layers[layer_i].weights[i].shift();  
+            }
+        }
+        //update the original activations of the given layer with the ones that were NOT dropped-out
+        let l_c = this.layers[layer_i].layer_copy;
+        for (var i=0; i<l_c.length; i++) {
+            for (var j=0; j<l_c[i].length; j++) {
+                if (dropped_out_i.includes(j)) continue;
+                else l_c[i][j] = this.layers[layer_i].layer[i].shift();  
+            }
+        }
+        //update the original outgoing weights of the given layer  with the weights that were NOT dropped-out
+        let last_w_c_next = this.layers[layer_i+1].weights_copy.pop();
+        for (var j=0; j<last_w_c_next.length; j++) {
+            if (dropped_out_i.includes(j)) continue;
+            else last_w_c_next[j] = this.layers[layer_i+1].weights.shift();  
+        }
+        //restore the original network formation before the drop-out
+        this.layers[layer_i].weights = JSON.parse(JSON.stringify(last_w_c));
+        this.layers[layer_i].layer = JSON.parse(JSON.stringify(l_c));
+        this.layers[layer_i+1].weights = JSON.parse(JSON.stringify(last_w_c_next));
+    }
+    
+    sigmoid(z) {
+        var bottom = math.add(1, math.exp(math.multiply(-1, z)));
+        return math.dotDivide(1, bottom);
+    }
+
+    printLayers() {
+        for(var i=0; i<this.layers.length; i++) {
+            console.log("LAYER "+i+":");
+            console.log("WEIGHTS "+math.size(this.layers[i].weights)+":");
+            for(var j=0; j<this.layers[i].weights.length; j++) {
+                console.log(this.layers[i].weights[j]);
+            }
+            if (this.layers[i].layer) {
+                console.log("ACTIVATIONS "+math.size(this.layers[i].layer)+":");
+                console.log(this.layers[i].layer);
+            } else console.log("ACTIVATIONS: "+this.layers[i].layer);
+            
+            console.log("END OF LAYER "+i);
+        }
     }
 
     train(epochs, X, y) {
@@ -164,11 +175,18 @@ export class NeuralNetwork {
             for (var x=0; x<X.length; x++) {
             this.input = [X[x]];
             this.Y = [y[x]];
-            //this.dropout(0, 0.05);
+            if (i>0) this.dropout(0, 0.5);
+            if (i>0) this.dropout(1, 0.1);
             this.feedforward();
             this.backprop();
+            if (i>0) this.dropout_restore(1);
+            if (i>0) this.dropout_restore(0);
+            this.layers[0].weights_copy = null;
+            this.layers[0].layer_copy = null;
+            this.layers[1].weights_copy = null;
+            this.layers[1].layer_copy = null;
+            this.layers[2].layer_copy = null;
             console.log(this.output);
-            //this.dropout_restore(0);
             }
         }
     }

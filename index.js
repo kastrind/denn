@@ -8,33 +8,33 @@ let X = [[1,0,1],
         [1,1,1],
         [1,1,0]];
 let y = [[1],[0],[1],[0],[0],[0]];
-let formation = [15];
+let formation = [{"neurons": 5, "dropout":0.2},{"neurons": 3, "dropout":0.1}];
 var nn = new NeuralNetwork(X, y, formation);
 
+// console.log("INITIAL LAYERS:");
+// nn.printLayers();
+// console.log("==============\n\n\n");
+
 //nn.train(500, X, y);
-for (var i=0; i<5000; i++) {
-  nn.dropout(0, 0.5);
+
+
+for (var i=0; i<700; i++) {
+  //console.log("ITERATION i="+i+":");
+  //if (i>0) nn.dropout(0, 0.2);
+  //if (i>0) nn.dropout(1, 0.1);
+  if (i>0) nn.dropout();
   nn.feedforward();
+  //console.log("\nAFTER FF:\n");
+  //nn.printLayers();
   nn.backprop();
-  nn.dropout_restore(0);
+  //console.log("\nRESTORING DROPOUTS:\n");
+  //if (i>0) nn.dropout_restore(1);
+  //if (i>0) nn.dropout_restore(0);
+  if (i>0) nn.dropoutRestore();
+  //console.log("\n\n\n==============\n\n\n");
+  //nn.printLayers();
 }
-nn.printLayers();
 console.log(nn.output);
-
-// for (var i=0; i<500; i++) {
-//   for (var x=0; x<X.length; x++) {
-//   nn.input = [X[x]];
-//   nn.Y = [y[x]];
-//   nn.Y = [y[x]];
-//   //nn.dropout(0, 0.05);
-//   nn.feedforward();
-//   nn.backprop();
-//   console.log(nn.output);
-//   //nn.dropout_restore(0);
-//   }
-// }
-//nn.printLayers();
-
 
 //predict:
 // X = [[1,0,1]];
