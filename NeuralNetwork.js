@@ -11,6 +11,8 @@ TODO:
     -convert to ES2015 OK
     -dropout OK
     -early stopping
+    -serialization
+    -accuracy measure
 */
 export class NeuralNetwork {
 
