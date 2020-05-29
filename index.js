@@ -11,14 +11,10 @@ let y = [[1],[0],[1],[0],[0],[0]];
 let formation = [{"neurons": 5, "dropout":0.2},{"neurons": 3, "dropout":0.1}];
 var nn = new NeuralNetwork(X, y, formation);
 
-// console.log("INITIAL LAYERS:");
-// nn.printLayers();
-// console.log("==============\n\n\n");
-
-//nn.train(500, X, y);
+nn.train(700, 6);
 
 
-for (var i=0; i<700; i++) {
+for (var i=0; i<0; i++) {
   //console.log("ITERATION i="+i+":");
   //if (i>0) nn.dropout(0, 0.2);
   //if (i>0) nn.dropout(1, 0.1);

@@ -5,7 +5,7 @@ TODO:
     -fix formation arg OK
     -add learning rate,
     -rename structure, X
-    -add epochs
+    -add epochs OK
     -add predict func
     -move activation function to its own class
     -convert to ES2015 OK
@@ -13,6 +13,7 @@ TODO:
     -early stopping
     -serialization
     -accuracy measure
+    -batch size OK
 */
 export class NeuralNetwork {
 
@@ -172,23 +173,25 @@ export class NeuralNetwork {
         }
     }
 
-    train(epochs, X, y) {
+    train(epochs, batch_size) {
+        let X = this.input;
+        let y = this.Y;
         for (var i=0; i<epochs; i++) {
+            let start_i = 0;
+            let stop_i = 0;
             for (var x=0; x<X.length; x++) {
-            this.input = [X[x]];
-            this.Y = [y[x]];
-            if (i>0) this.dropout(0, 0.5);
-            if (i>0) this.dropout(1, 0.1);
-            this.feedforward();
-            this.backprop();
-            if (i>0) this.dropout_restore(1);
-            if (i>0) this.dropout_restore(0);
-            this.layers[0].weights_copy = null;
-            this.layers[0].layer_copy = null;
-            this.layers[1].weights_copy = null;
-            this.layers[1].layer_copy = null;
-            this.layers[2].layer_copy = null;
-            console.log(this.output);
+                if (stop_i - start_i < batch_size) {
+                    stop_i++;
+                }
+                if (stop_i - start_i == batch_size || x == X.length-1) {
+                    this.input = X.slice(start_i, stop_i);
+                    this.Y = y.slice(start_i, stop_i);
+                    if (i>0) this.dropout();
+                    this.feedforward();
+                    this.backprop();
+                    if (i>0) this.dropoutRestore();
+                    start_i = stop_i;
+                }
             }
         }
     }
