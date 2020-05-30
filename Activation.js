@@ -10,4 +10,27 @@ export class Activation {
         return math.dotDivide(1, bottom);
     }
 
+    static relu(z, derivative) {
+        let return_z = [];
+        if (derivative === true) {
+            z.forEach(function (val, i) {
+                if (val > 0) {
+                    return_z[i] = math.random(0.9, 1);
+                }else {
+                    return_z[i] = math.random(0, 0.1);
+                }
+            });
+            return return_z;
+        }
+        let res = math.compare(0, z);
+        res.forEach(function (val, i) {
+            if (val == -1) {
+                return_z[i] = z[i];
+            }else {
+                return_z[i] = 0;
+            }
+        });
+        return return_z;
+    }
+
 }

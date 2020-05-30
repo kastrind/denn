@@ -1,4 +1,5 @@
 import * as math from 'mathjs';
+import { Activation } from './Activation';
 
 /*
 TODO:
@@ -50,7 +51,7 @@ export class NeuralNetwork {
         for (var i=0; i<this.layers.length; i++) {
             if(i==0) { this.layers[i].layer = math.multiply(this.input, this.layers[0].weights).map(v => this.activation(v, false)); }
             else if (i<this.layers.length-1) { this.layers[i].layer = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.activation(v, false)); }
-            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.activation(v, false)); }
+            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => Activation.sigmoid(v, false)); }
         }
     }
 
@@ -58,7 +59,7 @@ export class NeuralNetwork {
         for (var i=this.layers.length-1; i>=0; i--) {
             if (i==this.layers.length-1) {
                 this.layers[i].error = math.subtract(this.Y, this.output);
-                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => this.activation(v, true)));
+                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => Activation.sigmoid(v, true)));
             }
             else if (i<this.layers.length-1 || i==0) {
                 this.layers[i].error = math.multiply(this.layers[i+1].delta, math.transpose(this.layers[i+1].weights));
