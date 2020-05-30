@@ -2,28 +2,29 @@ import * as math from 'mathjs';
 
 /*
 TODO:
-    -fix formation arg OK
-    -add learning rate,
+    -fix formation arg, OK
+    -add learning rate, OK
     -rename structure, X
-    -add epochs OK
-    -add predict func
-    -move activation function to its own class
-    -convert to ES2015 OK
-    -dropout OK
-    -early stopping
-    -serialization
-    -accuracy measure
+    -add epochs, OK
+    -add predict func,
+    -move activation function to its own class,
+    -convert to ES2015, OK
+    -dropout, OK
+    -early stopping,
+    -serialization,
+    -accuracy measure,
     -batch size OK
 */
 export class NeuralNetwork {
 
-    constructor(X, Y, formation) {
+    constructor(X, Y, formation, learning_rate) {
         this.input = X;
         this.Y = Y;
         this.output = 0;
         this.layers = [];
         this.formation = formation;
         this.formationReversed = formation.slice().reverse();
+        this.learning_rate = learning_rate;
         this.initLayers();
     }
 
@@ -69,9 +70,9 @@ export class NeuralNetwork {
         }
         //update the weights
         for (var i=this.layers.length-1; i>=1; i--) {
-            this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), this.layers[i].delta));
+            this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), math.multiply(this.layers[i].delta, this.learning_rate)));
         }
-        this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), this.layers[0].delta));
+        this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), math.multiply(this.layers[0].delta, this.learning_rate)));
     }
 
     dropout() {
