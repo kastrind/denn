@@ -6,7 +6,7 @@ TODO:
     -add learning rate, OK
     -rename structure, X
     -add epochs, OK
-    -add predict func,
+    -add predict func, OK
     -move activation function to its own class,
     -convert to ES2015, OK
     -dropout, OK
@@ -195,5 +195,11 @@ export class NeuralNetwork {
                 }
             }
         }
+    }
+
+    predict(input) {
+        this.input = input;
+        this.feedforward();
+        return this.output;
     }
 }

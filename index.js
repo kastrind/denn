@@ -9,10 +9,12 @@ let X = [[1,0,1],
         [1,1,0]];
 let y = [[1],[0],[1],[0],[0],[0]];
 let formation = [{"neurons": 5, "dropout":0.2},{"neurons": 3, "dropout":0.1}];
-let learning_rate = .5;
+let learning_rate = 1;
 var nn = new NeuralNetwork(X, y, formation, learning_rate);
 
-nn.train(1500, 6);
+nn.train(700, 6);
+
+console.log(nn.predict([[0,0,0]]));
 
 
 for (var i=0; i<0; i++) {
