@@ -1,5 +1,6 @@
 //var neuralnet = require('./NeuralNetwork');
 import {NeuralNetwork} from './NeuralNetwork';
+import { Activation } from './Activation';
 
 let X = [[1,0,1],
         [0,1,1],
@@ -8,13 +9,13 @@ let X = [[1,0,1],
         [1,1,1],
         [1,1,0]];
 let y = [[1],[0],[1],[0],[0],[0]];
-let formation = [{"neurons": 5, "dropout":0.2},{"neurons": 3, "dropout":0.1}];
+let formation = [{"neurons": 5, "dropout": 0.2},{"neurons": 3, "dropout": 0.1}];
 let learning_rate = 1;
-var nn = new NeuralNetwork(X, y, formation, learning_rate);
+var nn = new NeuralNetwork(X, y, formation, learning_rate, Activation.sigmoid);
 
 nn.train(700, 6);
 
-console.log(nn.predict([[0,0,0]]));
+console.log(nn.predict([[1,0,1]]));
 
 
 for (var i=0; i<0; i++) {

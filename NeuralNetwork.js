@@ -7,7 +7,7 @@ TODO:
     -rename structure, X
     -add epochs, OK
     -add predict func, OK
-    -move activation function to its own class,
+    -move activation function to its own class, OK
     -convert to ES2015, OK
     -dropout, OK
     -early stopping,
@@ -17,7 +17,7 @@ TODO:
 */
 export class NeuralNetwork {
 
-    constructor(X, Y, formation, learning_rate) {
+    constructor(X, Y, formation, learning_rate, activation_function) {
         this.input = X;
         this.Y = Y;
         this.output = 0;
@@ -25,6 +25,7 @@ export class NeuralNetwork {
         this.formation = formation;
         this.formationReversed = formation.slice().reverse();
         this.learning_rate = learning_rate;
+        this.activation = activation_function;
         this.initLayers();
     }
 
@@ -44,16 +45,12 @@ export class NeuralNetwork {
         this.initialized = true;
         //this.printLayers();
     }
-
-    sigmoid_d(z) {
-        return math.dotMultiply(z, math.subtract(1, z));
-    }
     
     feedforward() {
         for (var i=0; i<this.layers.length; i++) {
-            if(i==0) { this.layers[i].layer = math.multiply(this.input, this.layers[0].weights).map(v => this.sigmoid(v, false)); }
-            else if (i<this.layers.length-1) { this.layers[i].layer = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.sigmoid(v, false)); }
-            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.sigmoid(v, false)); }
+            if(i==0) { this.layers[i].layer = math.multiply(this.input, this.layers[0].weights).map(v => this.activation(v, false)); }
+            else if (i<this.layers.length-1) { this.layers[i].layer = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.activation(v, false)); }
+            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.activation(v, false)); }
         }
     }
 
@@ -61,11 +58,11 @@ export class NeuralNetwork {
         for (var i=this.layers.length-1; i>=0; i--) {
             if (i==this.layers.length-1) {
                 this.layers[i].error = math.subtract(this.Y, this.output);
-                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => this.sigmoid_d(v)));
+                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => this.activation(v, true)));
             }
             else if (i<this.layers.length-1 || i==0) {
                 this.layers[i].error = math.multiply(this.layers[i+1].delta, math.transpose(this.layers[i+1].weights));
-                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.layers[i].layer.map(v => this.sigmoid_d(v))) ;
+                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.layers[i].layer.map(v => this.activation(v, true))) ;
             }
         }
         //update the weights
@@ -151,11 +148,6 @@ export class NeuralNetwork {
         this.layers[layer_i].weights = JSON.parse(JSON.stringify(last_w_c));
         this.layers[layer_i].layer = JSON.parse(JSON.stringify(l_c));
         this.layers[layer_i+1].weights = JSON.parse(JSON.stringify(last_w_c_next));
-    }
-    
-    sigmoid(z) {
-        var bottom = math.add(1, math.exp(math.multiply(-1, z)));
-        return math.dotDivide(1, bottom);
     }
 
     printLayers() {
