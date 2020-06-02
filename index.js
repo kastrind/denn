@@ -306,11 +306,11 @@ let y = [
 [1,0,0],
 [1,0,0]
 ];
-let formation = [{"neurons": 4, "dropout": 0.0}];
-let learning_rate = 0.1;
+let formation = [{"neurons": 5, "dropout": 0.0}];
+let learning_rate = 0.01;
 
-var nn = new NeuralNetwork(X, y, formation, learning_rate, Activation.sigmoid);
-nn.train(500, 10, true);
+var nn = new NeuralNetwork(X, y, formation, learning_rate, Activation.relu);
+nn.train(800, 3, true);
 //console.log(nn.predict([[6.2,3.4,5.4,2.3]]));
 let serialization_path = './nn-model.json';
 nn.serialize(serialization_path);
