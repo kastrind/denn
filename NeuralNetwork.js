@@ -1,5 +1,6 @@
 import * as math from 'mathjs';
 import { Activation } from './Activation';
+import fs from 'fs';
 
 /*
 TODO:
@@ -12,14 +13,17 @@ TODO:
     -convert to ES2015, OK
     -dropout, OK
     -early stopping,
-    -serialization,
-    -accuracy measure,
+    -serialization, OK
+    -accuracy measure, OK
     -batch size OK
+    -map output labels
+    -error handling
 */
 export class NeuralNetwork {
 
-    constructor(X, Y, formation, learning_rate, activation_function) {
+    constructor(X, Y, formation, learning_rate, activation_function, initialized) {
         this.input = X;
+        this.X = X;
         this.Y = Y;
         this.output = 0;
         this.layers = [];
@@ -27,7 +31,19 @@ export class NeuralNetwork {
         this.formationReversed = formation.slice().reverse();
         this.learning_rate = learning_rate;
         this.activation = activation_function;
+        this.activationName = activation_function.name;
         this.initLayers();
+    }
+
+    static deserialize(path) {
+        let nn_raw = fs.readFileSync(path);
+        let nn_deserialized = JSON.parse(nn_raw);
+        let activations = {"sigmoid": Activation.sigmoid, "relu": Activation.relu};
+        var nn = new NeuralNetwork(nn_deserialized.X, nn_deserialized.Y, nn_deserialized.formation, nn_deserialized.learning_rate, activations[nn_deserialized.activationName], true);
+        nn.input = nn_deserialized.input;
+        nn.output = nn_deserialized.output;
+        nn.layers = nn_deserialized.layers;
+        return nn;
     }
 
 
@@ -167,26 +183,43 @@ export class NeuralNetwork {
         }
     }
 
-    train(epochs, batch_size) {
+    train(epochs, batch_size, verbose) {
+        let report = "";
         let X = this.input;
         let y = this.Y;
+        let epoch_mean_error = 0;
         for (var i=0; i<epochs; i++) {
-            let start_i = 0;
-            let stop_i = 0;
+            let start_i = 0, stop_i = 0;
+            let batch_squared_errors = [], bse_size = [], batch_mean_error = 0;
+            let batch_cnt = 0;
             for (var x=0; x<X.length; x++) {
                 if (stop_i - start_i < batch_size) {
                     stop_i++;
                 }
                 if (stop_i - start_i == batch_size || x == X.length-1) {
+                    batch_cnt++;
                     this.input = X.slice(start_i, stop_i);
                     this.Y = y.slice(start_i, stop_i);
                     if (i>0) this.dropout();
                     this.feedforward();
                     this.backprop();
                     if (i>0) this.dropoutRestore();
+
+                    batch_squared_errors = math.subtract(this.Y, this.output);
+                    batch_squared_errors.forEach(function(row, i, arr) { arr[i] = row.map(v => v*v); });
+                    bse_size = math.size(batch_squared_errors);
+                    batch_mean_error = math.divide(math.sum(batch_squared_errors), bse_size[0]*bse_size[1]);
+                    epoch_mean_error += batch_mean_error;
+
                     start_i = stop_i;
                 }
             }
+            epoch_mean_error /= batch_cnt;
+            if (verbose) {
+                console.log("epoch: "+i+" / "+epochs+", mean error: "+epoch_mean_error+"\n");
+            }
+            batch_cnt = 0;
+            epoch_mean_error = 0;
         }
     }
 
@@ -195,4 +228,41 @@ export class NeuralNetwork {
         this.feedforward();
         return this.output;
     }
+
+    test(X, Y, verbose) {
+        let output = this.predict(X);
+        let hits = 0;
+        let report = "";
+        let that = this;
+        output.forEach(function (row, i, arr) {
+            if (that.maxIndex(row) === that.maxIndex(Y[i])) {
+                hits++;
+            }
+            if (verbose) { report += "expected: "+Y[i]+", actual: "+row+", current hits: "+hits+"\n"; }
+        });
+        let accuracy = math.divide(hits, output.length);
+        if (verbose) { report += "accuracy: "+accuracy+"\n"; console.log(report); }
+        return accuracy;
+    }
+
+    maxIndex(arr) {
+        if (!arr.length) {
+            return -1;
+        }
+        let max = arr[0];
+        let max_i = 0;
+        for (let i=0; i<arr.length; i++) {
+            if (arr[i]>max) {
+                max_i = i;
+                max = arr[i]
+            }
+        }
+        return max_i;
+    }
+
+    serialize(path) {
+        let nn_serialized = JSON.stringify(this);
+        fs.writeFileSync(path, nn_serialized);
+    }
+
 }
