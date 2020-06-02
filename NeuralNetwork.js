@@ -214,7 +214,7 @@ export class NeuralNetwork {
                     start_i = stop_i;
                 }
             }
-            epoch_mean_error /= batch_cnt;
+            epoch_mean_error = math.divide(epoch_mean_error, batch_cnt);
             if (verbose) {
                 console.log("epoch: "+i+" / "+epochs+", mean error: "+epoch_mean_error+"\n");
             }
