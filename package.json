@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mathjs": "^7.0.0"
+    "mathjs": "^7.0.0",
+    "n-readlines": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

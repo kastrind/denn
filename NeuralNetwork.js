@@ -18,6 +18,9 @@ TODO:
     -batch size OK
     -map output labels
     -error handling
+    -rename
+    -import OK
+    -train test OK
 */
 export class NeuralNetwork {
 
