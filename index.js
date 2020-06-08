@@ -1,6 +1,10 @@
 //var neuralnet = require('./NeuralNetwork');
 import {NeuralNetwork} from './NeuralNetwork';
 import { Activation } from './Activation';
+import { Utilities } from './Utilities';
+
+let utils = new Utilities();
+console.log(Utilities.labelsToOneHot(["one", "two", "three"]));
 
 let X = [
   [5.1,3.5,1.4,0.2],
@@ -310,7 +314,7 @@ let formation = [{"neurons": 5, "dropout": 0.0}];
 let learning_rate = 0.01;
 
 var nn = new NeuralNetwork(X, y, formation, learning_rate, Activation.sigmoid);
-nn.train(800, 10, true);
+nn.train(1, 10, true);
 //console.log(nn.predict([[6.2,3.4,5.4,2.3]]));
 let serialization_path = './nn-model.json';
 nn.serialize(serialization_path);
