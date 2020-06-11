@@ -12,13 +12,12 @@ TODO:
     -move activation function to its own class, OK
     -convert to ES2015, OK
     -dropout, OK
-    -early stopping,
+    -early stopping, OK
     -serialization, OK
     -accuracy measure, OK
     -batch size OK
     -map output labels
     -error handling
-    -rename
     -import OK
     -train test OK
 */
@@ -186,7 +185,7 @@ export class NeuralNetwork {
         }
     }
 
-    train(epochs, batch_size, verbose) {
+    train(epochs, batch_size, error_threshold, verbose) {
         let report = "";
         let X = this.input;
         let y = this.Y;
@@ -203,6 +202,7 @@ export class NeuralNetwork {
                     batch_cnt++;
                     this.input = X.slice(start_i, stop_i);
                     this.Y = y.slice(start_i, stop_i);
+                    
                     if (i>0) this.dropout();
                     this.feedforward();
                     this.backprop();
@@ -220,6 +220,10 @@ export class NeuralNetwork {
             epoch_mean_error = math.divide(epoch_mean_error, batch_cnt);
             if (verbose) {
                 console.log("epoch: "+i+" / "+epochs+", mean error: "+epoch_mean_error+"\n");
+            }
+            if (epoch_mean_error <= error_threshold) {
+                if (verbose) console.log("Early stopping to avoid over-fitting.\n");
+                break;
             }
             batch_cnt = 0;
             epoch_mean_error = 0;

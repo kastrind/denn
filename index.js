@@ -11,10 +11,10 @@ let train_test = DataSet.separateTrainTest(datasetXY, 0.2);
 
 let X = train_test.train.X;
 let Y = train_test.train.Y_one_hot;
-let formation = [{"neurons": 6, "dropout": 0.0}];
+let formation = [{"neurons": 5, "dropout": 0.0}];
 let learning_rate = 0.05;
 var nn = new NeuralNetwork(X, Y, formation, learning_rate, Activation.sigmoid);
-nn.train(100, 3, true);
+nn.train(800, 3, 0.02, true);
 
 let serialization_path = './nn-model.json';
 nn.serialize(serialization_path);

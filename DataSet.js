@@ -81,14 +81,22 @@ export class DataSet {
     /**
      * Separates the resulting dataset object to a train set and a test set.
      * @param {Object} data The dataset object with X, Y and optionally Y_onehot property
-     * @param {Float} test_p The approximate portion of the data that will be kept as a test set
+     * @param {Float} test_p The approximate portion [0 - 1] of the data that will be kept as a test set
      */
     static separateTrainTest(data, test_p) {
         if (!data || !data.hasOwnProperty('X') || !data.hasOwnProperty('Y')) return null;
         let test_indexes = [];
+        let cardinality = Math.floor(test_p*data.X.length);
         data.X.forEach((elem, i) => {
             if (Math.random() <= test_p) test_indexes.push(i);
         });
+        if (test_indexes.length - cardinality > 0) { test_indexes.splice(0, test_indexes.length - cardinality); }
+        let i=0;
+        while (test_indexes.length < cardinality) {
+            if (!test_indexes.includes(i)) test_indexes.push(i);
+            i++;
+        }
+        console.log(test_indexes.length);
         let tt = { train: { X: [], Y: [] }, test: { X: [], Y: [] } };
         if (data.Y_one_hot) { tt.train["Y_one_hot"] = []; tt.test["Y_one_hot"] = []; }
         data.X.forEach((elem, i) => {
