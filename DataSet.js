@@ -33,6 +33,20 @@ export class DataSet {
         return onehot_arrays;
     }
 
+    static oneHotToLabels(onehot_arrays, label_arrays) {
+        let curr_key = "";
+        //let label_arrays = {};
+        Object.keys(onehot_arrays).forEach( (label) => {
+            let oh_arr = onehot_arrays[label];
+            oh_arr.forEach( (elem) => {
+                curr_key += elem;
+            });
+            label_arrays[curr_key] = label;
+            curr_key = "";
+        });
+        return label_arrays;
+    }
+
     /**
      * Imports a data set from a file having each case in a line and features separated by the specified separator.
      * @param {String} path_to_file  The input file path.
@@ -56,7 +70,7 @@ export class DataSet {
      * @param {Integer} Y_index The index of the output feature (default: the index of the last feature element of a row).
      * @param {Boolean} one_hot Whether to provide a one-hot representation of the output feature as well.
      */
-    static separateXY(data, Y_index, one_hot) {
+    static separateXY(data, Y_index, one_hot, onehot_to_labels) {
         if (!data || !data.length) return { X: [], Y: [] };
         Y_index = !Y_index ? (data[0].length - 1) : Y_index;
         let X = [], Y = [], labels = [];
@@ -69,6 +83,7 @@ export class DataSet {
         });
         if (one_hot) {
             let labelsToOneHot = DataSet.labelsToOneHot(Object.keys(labels));
+            DataSet.oneHotToLabels(labelsToOneHot, onehot_to_labels);
             let Y_one_hot = [];
             Y.forEach((label) => {
                 Y_one_hot.push(labelsToOneHot[label]);

@@ -231,24 +231,52 @@ export class NeuralNetwork {
         }
     }
 
-    predict(input) {
+    predict(input, onehot_to_labels) {
         this.input = input;
         this.feedforward();
-        return this.output;
+        //return this.output;
+        let that = this;
+        let output = [], onehot_array = [];
+        let max_i = -1;
+        let curr_key = "";
+
+        this.output.forEach(function (row, i, arr) {
+            onehot_array = math.zeros(row.length)._data;
+            max_i = that.maxIndex(row);
+            onehot_array[max_i] = 1;
+            //if one-hot representation to label mapping is provided, return labels
+            if (onehot_to_labels) {
+                curr_key = "";
+                onehot_array.forEach( (elem) => {
+                    curr_key += elem;
+                });
+                output.push(onehot_to_labels[curr_key]);
+            //else return one-hot representation
+            }else {
+                output.push(onehot_array);
+            }
+
+        });
+        return output;
     }
 
     test(X, Y, verbose) {
-        let output = this.predict(X);
+        this.input = X;
+        this.feedforward();
+        //let output = this.predict(X);
         let hits = 0;
+        let success=false;
         let report = "";
         let that = this;
-        output.forEach(function (row, i, arr) {
+        this.output.forEach(function (row, i, arr) {
             if (that.maxIndex(row) === that.maxIndex(Y[i])) {
+                success=true;
                 hits++;
             }
-            if (verbose) { report += "expected: "+Y[i]+", actual: "+row+", current hits: "+hits+"\n"; }
+            if (verbose) { report += "expected: "+Y[i]+", actual: "+row+", successful: "+success+", current hits: "+hits+"\n"; }
+            success=false;
         });
-        let accuracy = math.divide(hits, output.length);
+        let accuracy = math.divide(hits, this.output.length);
         if (verbose) { report += "accuracy: "+accuracy+"\n"; console.log(report); }
         return accuracy;
     }
