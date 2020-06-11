@@ -20,6 +20,7 @@ TODO:
     -error handling
     -import OK
     -train test OK
+    -normalize dataset OK
 */
 export class NeuralNetwork {
 

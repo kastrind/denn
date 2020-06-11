@@ -79,9 +79,20 @@ export class DataSet {
     }
 
     /**
+     * Normalizes the provided data set.
+     * @param {Array} data The data set to normalize.
+     */
+    static normalize(data) {
+        let maxes = math.max(data, 0);
+        data.forEach((elem, i, arr) => {
+            arr[i] = math.dotDivide(arr[i], maxes);
+        });
+    }
+
+    /**
      * Separates the resulting dataset object to a train set and a test set.
-     * @param {Object} data The dataset object with X, Y and optionally Y_onehot property
-     * @param {Float} test_p The approximate portion [0 - 1] of the data that will be kept as a test set
+     * @param {Object} data The dataset object with X, Y and optionally Y_onehot property.
+     * @param {Float} test_p The approximate portion [0 - 1] of the data that will be kept as a test set.
      */
     static separateTrainTest(data, test_p) {
         if (!data || !data.hasOwnProperty('X') || !data.hasOwnProperty('Y')) return null;
@@ -96,7 +107,6 @@ export class DataSet {
             if (!test_indexes.includes(i)) test_indexes.push(i);
             i++;
         }
-        console.log(test_indexes.length);
         let tt = { train: { X: [], Y: [] }, test: { X: [], Y: [] } };
         if (data.Y_one_hot) { tt.train["Y_one_hot"] = []; tt.test["Y_one_hot"] = []; }
         data.X.forEach((elem, i) => {
