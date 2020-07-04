@@ -22,7 +22,8 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
     // Shuffle dataset
     dataset = DataSet.shuffle(dataset);
 
-    // Separate input features from output variables and get a mapping of one-hot representation to the categorical values of the output
+    // Separate input features from output variables and get a mapping of one-hot representation
+    // to the categorical values of the output
     let onehot_to_labels = {};
     let datasetXY = DataSet.separateXY(dataset, 4, true, onehot_to_labels);
 
@@ -39,7 +40,8 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
     let formation = [{"neurons": 5, "dropout": 0.0}];
     let learning_rate = 0.15;
 
-    // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
+    // Instantiate DNN with a training set, architecture, learning rate and activation function
+    // of its hidden layer(s)
     var nn = new Denn(X, Y, formation, learning_rate, Activation.relu);
 
     // Train DNN
