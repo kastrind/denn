@@ -6,7 +6,7 @@ export class DataSet {
     /**
      * https://stackoverflow.com/a/6274381/2032235
      * Shuffles array in place.
-     * @param {Array} a items An array containing the items.
+     * @param {Array} a An array containing the items.
      */
     static shuffle(a) {
         var j, x, i;
@@ -21,7 +21,7 @@ export class DataSet {
 
     /**
      * Maps a categorical set to one-hot representation.
-     * @param {Array} labels_array items An array containing the categorical values.
+     * @param {Array} labels_array An array containing the categorical values.
      */
     static labelsToOneHot(labels_array) {
         let onehot_arrays = {};
@@ -33,6 +33,11 @@ export class DataSet {
         return onehot_arrays;
     }
 
+    /**
+     * Maps a one-hot set to categorical value representation.
+     * @param {Array} onehot_arrays An array containing the one-hot representation of categorical values.
+     * @param {Object} label_arrays where the mapping will be assigned; provide an empty object initially.
+     */
     static oneHotToLabels(onehot_arrays, label_arrays) {
         let curr_key = "";
         //let label_arrays = {};
