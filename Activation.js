@@ -2,6 +2,11 @@ import * as math from 'mathjs';
 
 export class Activation {
 
+    /**
+     * Sigmoid activation.
+     * @param {Array} z  Input matrix.
+     * @param {Boolean} derivative  True for sigmoid derivative
+     */
     static sigmoid(z, derivative) {
         if (derivative === true) {
             return math.dotMultiply(z, math.subtract(1, z));
@@ -10,6 +15,11 @@ export class Activation {
         return math.dotDivide(1, bottom);
     }
 
+    /**
+     * Relu activation.
+     * @param {Array} z  Input matrix.
+     * @param {Boolean} derivative  True for relu derivative
+     */
     static relu(z, derivative) {
         let return_z = [];
         if (derivative === true) {
