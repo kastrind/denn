@@ -3,9 +3,10 @@ Neural Networks are a fascinating and even mysterious subject in Machine Learnin
 This project implements a Deep Neural Network, a certain type of Neural Networks which employs at least one hidden layer of neurons.
 
 # :wrench: Setup
-`npm install`
-`babel-node index.js --presets=env`
-:collision: If babel-node is not recoginized (may occur in Windows 10), please install globally: `npm install babel-cli -g`
+1. `npm install`
+2. `babel-node index.js --presets=env`
+
+:collision: If `babel-node` command is not recognized (may occur in Windows 10), please install globally: `npm install babel-cli -g`
 
 # :airplane: Usage
 
