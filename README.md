@@ -2,7 +2,7 @@
 Neural Networks are a fascinating and even mysterious subject in Machine Learning.
 This project implements a Deep Neural Network, a certain type of Neural Networks which employs at least one hidden layer of neurons.
 
-# :wrench: Setup
+# :wrench: Setup & Run
 1. `npm install`
 2. `babel-node index.js --presets=env`
 
