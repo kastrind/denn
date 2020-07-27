@@ -64,5 +64,5 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
 - [Machine Learning, Data Science and Deep Learning with Python - Frank Kane](https://www.udemy.com/course/data-science-and-machine-learning-with-python-hands-on/)
 - [Understanding the Mathematics behind Gradient Descent - Parul Pandey](https://towardsdatascience.com/understanding-the-mathematics-behind-gradient-descent-dde5dc9be06e)
 - [How to build your own Neural Network from scratch in Python - James Loy](https://towardsdatascience.com/how-to-build-your-own-neural-network-from-scratch-in-python-68998a08e4f6)
-- [Petro Liashchynskyi](https://dev.to/liashchynskyi/creating-of-neural-network-using-javascript-in-7minutes-o21)
+- [Creating of neural network using JavaScript in 7 minutes! - Petro Liashchynskyi](https://dev.to/liashchynskyi/creating-of-neural-network-using-javascript-in-7minutes-o21)
 - [Backpropagation calculus - Channel 3Blue1Brown](https://www.youtube.com/watch?v=tIeHLnjs5U8&t=307s)
