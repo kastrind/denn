@@ -16,7 +16,6 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
     import { DataSet } from './DataSet';
 
     // Import dataset
-    let ds = new DataSet();
     let dataset =  DataSet.import("iris.txt", ',');
 
     // Shuffle dataset
@@ -60,3 +59,10 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
 
     // Test model
     nn2.test(train_test.test.X, train_test.test.Y_one_hot, true);
+
+# :crown: Acknowledgements
+- [Machine Learning, Data Science and Deep Learning with Python - Frank Kane](https://www.udemy.com/course/data-science-and-machine-learning-with-python-hands-on/)
+- [Understanding the Mathematics behind Gradient Descent - Parul Pandey](https://towardsdatascience.com/understanding-the-mathematics-behind-gradient-descent-dde5dc9be06e)
+- [How to build your own Neural Network from scratch in Python - James Loy](https://towardsdatascience.com/how-to-build-your-own-neural-network-from-scratch-in-python-68998a08e4f6)
+- [Petro Liashchynskyi](https://dev.to/liashchynskyi/creating-of-neural-network-using-javascript-in-7minutes-o21)
+- [Backpropagation calculus - Channel 3Blue1Brown](https://www.youtube.com/watch?v=tIeHLnjs5U8&t=307s)
