@@ -1,4 +1,4 @@
-# :sparkler: DENN: a Deep Neural Network in JavaScript
+# :sparkler: DeNN: a Deep Neural Network in JavaScript
 Neural Networks are a fascinating and even mysterious subject in Machine Learning.
 This project implements a Deep Neural Network, a certain type of Neural Networks which employs at least one hidden layer of neurons.
 
