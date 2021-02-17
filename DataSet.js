@@ -77,10 +77,18 @@ export class DataSet {
      */
     static separateXY(data, Y_index, one_hot, onehot_to_labels) {
         if (!data || !data.length) return { X: [], Y: [] };
-        Y_index = !Y_index ? (data[0].length - 1) : Y_index;
+        Y_index = Number.isNaN(Y_index) ? (data[0].length - 1) : Y_index;
         let X = [], Y = [], labels = [];
         data.forEach((row) => {
-            let X_row = row.slice(0, Y_index);
+            let X_row;
+            if (Y_index === 0) {
+                X_row = row.slice(1, row.length);
+            }else if (Y_index === row.length - 1) {
+                X_row = row.slice(0, Y_index);
+            }else {
+                X_row = row.slice(0, Y_index);
+                X_row = X_row.concat(row.slice(Y_index+1, row.length));
+            }
             X_row.forEach( (elem, i, arr) => { arr[i] = parseFloat(elem); });
             X.push(X_row);
             Y.push(row[Y_index]);
@@ -106,6 +114,10 @@ export class DataSet {
         let maxes = math.max(data, 0);
         data.forEach((elem, i, arr) => {
             arr[i] = math.dotDivide(arr[i], maxes);
+            //replace NaN values with 0
+            arr[i].forEach((elem, i , arr) => {
+                arr[i] = Number.isNaN(elem) ? 0 : elem;
+            });
         });
     }
 
