@@ -3,7 +3,7 @@ import { Activation } from './Activation';
 import { DataSet } from './DataSet';
 
 // Import dataset
-let dataset =  DataSet.import("iris.txt", ',');
+let dataset =  DataSet.import("assets/iris.txt", ',');
 
 // Shuffle dataset
 dataset = DataSet.shuffle(dataset);

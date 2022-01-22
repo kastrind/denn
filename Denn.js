@@ -44,12 +44,12 @@ export class Denn {
         if (this.initialized === true) return;
         for (var i=0; i<this.formation.length; i++) {
             if (i==0) {
-                this.layers.push({"weights": math.random([this.input[0].length, this.formation[i].neurons]), "layer": [], "weights_copy": [], "layer_copy": [], "dropped_out_i": []});
+                this.layers.push({"weights": math.random([this.input[0].length, this.formation[i].neurons], 0, 0.001), "layer": [], "weights_copy": [], "layer_copy": [], "dropped_out_i": []});
             }else if (i<=this.formation.length-1) {
-                this.layers.push({"weights": math.random([this.formation[i-1].neurons, this.formation[i].neurons]), "layer": [], "weights_copy": [], "layer_copy": [], "dropped_out_i": []});
+                this.layers.push({"weights": math.random([this.formation[i-1].neurons, this.formation[i].neurons], 0, 0.001), "layer": [], "weights_copy": [], "layer_copy": [], "dropped_out_i": []});
             } 
             if (i==this.formation.length-1) {
-                this.layers.push({"weights": math.random([this.formation[i].neurons, this.Y[0].length]), "weights_copy": []});
+                this.layers.push({"weights": math.random([this.formation[i].neurons, this.Y[0].length], 0, 0.001), "weights_copy": []});
             }
         }
         this.initialized = true;
