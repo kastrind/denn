@@ -3,7 +3,7 @@ import { Activation } from './Activation';
 import { DataSet } from './DataSet';
 
 // Import dataset
-let dataset =  DataSet.import("assets/mnist_train_tiny.csv", ',');
+let dataset =  DataSet.import("assets/mnist_train.csv", ',');
 
 // Shuffle dataset
 dataset = DataSet.shuffle(dataset);
@@ -22,14 +22,14 @@ let X = train_test.train.X;
 let Y = train_test.train.Y_one_hot;
 
 // This DNN will comprise one hidden layer of 42 neurons without drop-out probability
-let formation = [{"neurons": 53, "dropout": 0}];
-let learning_rate = 0.15;
+let formation = [{"neurons": 64, "dropout": 0}, {"neurons": 64, "dropout": 0}];
+let learning_rate = 0.01;
 
 // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
 var nn = new Denn(X, Y, formation, learning_rate, Activation.relu);
 
 // Train DNN
-let epochs = 10, batch_size = 5, error_threshold = 0.01, verbose = true;
+let epochs = 200, batch_size = 1, error_threshold = 0.003, verbose = true;
 
 nn.train(epochs, batch_size, error_threshold, verbose);
 nn.test(train_test.test.X, train_test.test.Y_one_hot, verbose);
