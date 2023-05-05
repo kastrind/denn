@@ -1,72 +1,103 @@
-let corpus = "One two three. alpha beta gamma. The king was a wise man. The queen was a kind woman.";
-let dimensions = 5;
+import { Denn } from './Denn';
 
-corpus = corpus.replace(/[,]\s?/g, " "); // ignore commas
-corpus = corpus.replace(/[:]\s?/g, " "); // part : part as one sentence
-corpus = corpus.replace(/[.;]\s?/g, "."); // . ; treated the same
-let sentences = corpus.split(/[.,]/); // . marks sentences
-sentences = sentences.filter(sentence => sentence.length);
+export class Embeddings {
 
-let adjacencyPairsForward = [];
-let dictionary = {};
+  constructor(corpus, dimensions) {
+    this.corpus = corpus;
+    this.dimensions = dimensions;
+    this.sentences = [];
+    this.dictionary = {};
+    this.dictionaryVectors = {};
+    this.adjacencyPairs = [];
+    this.trainSet = [];
+    this.trainSetCSV = "";
 
-sentences.forEach(sentence => 
-{
-  sentence = sentence.toLowerCase();
-	let terms = sentence.split(" ");
-  for (let i=0; i<terms.length; i++) {
-    let term = terms[i];
-    dictionary[term] = dictionary[term] ? dictionary[term]+1 : 1;
-    for (let j=i; j<terms.length; j++) {
-      if (j+1 < terms.length) {
-        adjacencyPairsForward.push({x: term, y: terms[j+1]});
+    // clean-up corpus
+    this.corpus = this.corpus.replace(/[,]\s?/g, " "); // ignore commas
+    this.corpus = this.corpus.replace(/[:]\s?/g, " "); // part : part as one sentence
+    this.corpus = this.corpus.replace(/[.;]\s?/g, "."); // . ; treated the same
+    // find sentences
+    this.sentences = this.corpus.split(/[.]/); // . marks sentences
+    this.sentences = this.sentences.filter(sentence => sentence.length);
+
+    let adjacencyPairsForward = [];
+
+    // build dictionary and adjacency pairs
+    this.sentences.forEach(sentence => 
+    {
+      sentence = sentence.toLowerCase();
+      let terms = sentence.split(" ");
+      for (let i=0; i<terms.length; i++) {
+        let term = terms[i];
+        this.dictionary[term] = this.dictionary[term] ? this.dictionary[term]+1 : 1;
+        for (let j=i; j<terms.length; j++) {
+          if (j+1 < terms.length) {
+            adjacencyPairsForward.push({x: term, y: terms[j+1]});
+          }
+        }
       }
-    }
+    });
+
+    let dictionarySize = Object.keys(this.dictionary).length;
+    let buckets = Math.ceil(dictionarySize/this.dimensions);
+
+    // generate initial vectors for each dictionary term
+    Object.keys(this.dictionary).forEach((term, idx) =>
+    {
+      let termVector = Array.from({length: this.dimensions}, (x, i) => 0);
+      let bucket = idx%buckets + 1;
+      termVector[idx%this.dimensions] = bucket/buckets;
+      this.dictionaryVectors[term] = termVector;
+    });
+
+    let adjacencyPairsBackward = [];
+    // build backward adjacency pairs
+    adjacencyPairsForward.forEach(pair => 
+    {
+      adjacencyPairsBackward.push({x: pair.y, y: pair.x});
+    });
+
+    // set all adjacency pairs
+    this.adjacencyPairs = adjacencyPairsForward.concat(adjacencyPairsBackward);
+
+    // build the embeddings training set
+    this.adjacencyPairs.forEach(pair =>
+    {
+      let row = this.dictionaryVectors[pair.x].concat(this.dictionaryVectors[pair.y]);
+      this.trainSetCSV += row.join(',') + '\n';
+      this.trainSet.push(row);
+    });
+
   }
-});
 
-let dictionarySize = Object.keys(dictionary).length;
-let dictionaryVectors = {};
-let buckets = Math.ceil(dictionarySize/dimensions);
-//console.log(buckets);
+  train(formation, learning_rate, activation_function, epochs, batch_size, error_threshold, verbose = false) {
+    let datasetXY = { X:[], Y:[] };
 
-Object.keys(dictionary).forEach((term, idx) =>
-{
-  let termVector = Array.from({length: dimensions}, (x, i) => 0);
-  let bucket = idx%buckets + 1;
-  termVector[idx%dimensions] = bucket/buckets;
-  dictionaryVectors[term] = termVector;
-});
-//console.log(Object.values(dictionaryVectors));
-console.log(dictionaryVectors);
+    this.trainSet.forEach(row => {
+      datasetXY.X.push(row.slice(0, this.dimensions));
+      datasetXY.Y.push(row.slice(this.dimensions, this.dimensions*2));
+    });
 
-let adjacencyPairsBackward = [];
-adjacencyPairsForward.forEach(pair => 
-{
-  adjacencyPairsBackward.push({x: pair.y, y: pair.x});
-});
+    let X = datasetXY.X;
+    let Y = datasetXY.Y;
 
-let adjacencyPairs = adjacencyPairsForward.concat(adjacencyPairsBackward);
+    // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
+    var nn = new Denn(X, Y, formation, learning_rate, activation_function);
 
-let test = adjacencyPairs.filter(pair =>
-{
-  return pair.x == "man";
-});
+    // Train DNN
+    nn.train(epochs, batch_size, error_threshold, verbose);
 
-let trainSet = [];
-let trainSetCSV = "";
+    this.dictionaryEmbeddings = {};
 
-adjacencyPairs.forEach(pair =>
-{
-	let row = dictionaryVectors[pair.x].concat(dictionaryVectors[pair.y]);
-  trainSetCSV += row.join(',') + '\n'
-  trainSet.push(row);
-});
+    Object.keys(this.dictionaryVectors).forEach( term => {
+      console.log(term);
+      console.log(this.dictionaryVectors[term]);
+      nn.predict([this.dictionaryVectors[term]]);
+      this.dictionaryEmbeddings[term] = nn.output[0];
+    });
 
-console.log(trainSetCSV);
+    console.log(this.dictionaryEmbeddings);
+    return this.dictionaryEmbeddings;
+  }
 
-//console.log(test);
-//console.log(dictionary);
-
-//console.log(adjacencyPairs);
-//console.log(adjacencyPairs.length);
+}
