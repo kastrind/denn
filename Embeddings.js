@@ -1,4 +1,5 @@
 import { Denn } from './Denn';
+import fs from 'fs';
 
 export class Embeddings {
 
@@ -13,6 +14,8 @@ export class Embeddings {
     this.trainSetCSV = "";
 
     // clean-up corpus
+    this.corpus = this.corpus.replace(/\s+/g, " "); // clear excess white-space
+    this.corpus = this.corpus.replace(/(\)|\()/g, ""); // ignore parentheses
     this.corpus = this.corpus.replace(/[,]\s?/g, " "); // ignore commas
     this.corpus = this.corpus.replace(/[:]\s?/g, " "); // part : part as one sentence
     this.corpus = this.corpus.replace(/[.;]\s?/g, "."); // . ; treated the same
@@ -90,14 +93,32 @@ export class Embeddings {
     this.dictionaryEmbeddings = {};
 
     Object.keys(this.dictionaryVectors).forEach( term => {
-      console.log(term);
-      console.log(this.dictionaryVectors[term]);
+      //console.log(term);
+      //console.log(this.dictionaryVectors[term]);
       nn.predict([this.dictionaryVectors[term]]);
       this.dictionaryEmbeddings[term] = nn.output[0];
     });
 
-    console.log(this.dictionaryEmbeddings);
+    //console.log(this.dictionaryEmbeddings);
     return this.dictionaryEmbeddings;
+  }
+
+      /**
+     * Serializes embeddings to a file in the given path.
+     * @param {String} path  The path.
+     */
+  serialize(path) {
+        console.log("Serializing embeddings to "+path+"...");
+        let embeddings_serialized = JSON.stringify(this.dictionaryEmbeddings, null, 2);
+        fs.writeFileSync(path, embeddings_serialized);
+        console.log("Serialized embeddings successfully.");
+    }
+
+  serializeAll(path) {
+      console.log("Serializing embeddings to "+path+"...");
+      let embeddings_serialized = JSON.stringify(this, null, 2);
+      fs.writeFileSync(path, embeddings_serialized);
+      console.log("Serialized embeddings successfully.");
   }
 
 }

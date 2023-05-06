@@ -77,9 +77,9 @@ export class Denn {
         }
         //update the weights
         for (var i=this.layers.length-1; i>=1; i--) {
-            this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), math.multiply(this.layers[i].delta, math.max(0.00000000001, this.learning_rate*(1-epoch_idx*0.001)))));
+            this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), math.multiply(this.layers[i].delta, math.max(0.0001, this.learning_rate*(1-epoch_idx*0.0001)))));
         }
-        this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), math.multiply(this.layers[0].delta, math.max(0.0000000001, this.learning_rate*(1-epoch_idx*0.001)))));
+        this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), math.multiply(this.layers[0].delta, math.max(0.0001, this.learning_rate*(1-epoch_idx*0.0001)))));
     }
 
     dropout() {
