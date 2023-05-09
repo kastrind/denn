@@ -46,6 +46,8 @@ nn.serialize(serialization_path);
 //nn2.test(train_test.test.X, train_test.test.Y_one_hot, true);
 nn.test(train_test.test.X, train_test.test.Y_one_hot, true);
 
+console.log(train_test.test.Y_one_hot);
+
 /*
 Predictions below should be
   'Iris-versicolor',

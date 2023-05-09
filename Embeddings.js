@@ -3,30 +3,28 @@ import fs from 'fs';
 
 export class Embeddings {
 
-  constructor(corpus, dimensions) {
-    this.corpus = corpus;
+  constructor(corpusPath, sentencesOutPath, dimensions) {
     this.dimensions = dimensions;
-    this.sentences = [];
     this.dictionary = {};
     this.dictionaryVectors = {};
     this.adjacencyPairs = [];
     this.trainSet = [];
-    this.trainSetCSV = "";
 
-    // clean-up corpus
-    this.corpus = this.corpus.replace(/\s+/g, " "); // clear excess white-space
-    this.corpus = this.corpus.replace(/(\)|\()/g, ""); // ignore parentheses
-    this.corpus = this.corpus.replace(/[,]\s?/g, " "); // ignore commas
-    this.corpus = this.corpus.replace(/[:]\s?/g, " "); // part : part as one sentence
-    this.corpus = this.corpus.replace(/[.;]\s?/g, "."); // . ; treated the same
+    // load and cleanse corpus
+    let corpus = Embeddings.loadCorpus(corpusPath);
+
     // find sentences
-    this.sentences = this.corpus.split(/[.]/); // . marks sentences
-    this.sentences = this.sentences.filter(sentence => sentence.length);
+    let sentences = [];
+    sentences = corpus.split(/[.]/); // . marks sentences
+    sentences = sentences.filter(sentence => sentence.length);
+
+    let corpusSentences = JSON.stringify({ sentences: sentences }, null, 2);
+    fs.writeFileSync(sentencesOutPath, corpusSentences);
 
     let adjacencyPairsForward = [];
 
     // build dictionary and adjacency pairs
-    this.sentences.forEach(sentence => 
+    sentences.forEach(sentence => 
     {
       sentence = sentence.toLowerCase();
       let terms = sentence.split(" ");
@@ -67,7 +65,6 @@ export class Embeddings {
     this.adjacencyPairs.forEach(pair =>
     {
       let row = this.dictionaryVectors[pair.x].concat(this.dictionaryVectors[pair.y]);
-      this.trainSetCSV += row.join(',') + '\n';
       this.trainSet.push(row);
     });
 
@@ -103,22 +100,29 @@ export class Embeddings {
     return this.dictionaryEmbeddings;
   }
 
-      /**
-     * Serializes embeddings to a file in the given path.
-     * @param {String} path  The path.
-     */
+  /**
+   * Serializes embeddings to a file in the given path.
+   * @param {String} path  The path.
+   */
   serialize(path) {
-        console.log("Serializing embeddings to "+path+"...");
-        let embeddings_serialized = JSON.stringify(this.dictionaryEmbeddings, null, 2);
-        fs.writeFileSync(path, embeddings_serialized);
-        console.log("Serialized embeddings successfully.");
-    }
-
-  serializeAll(path) {
       console.log("Serializing embeddings to "+path+"...");
       let embeddings_serialized = JSON.stringify(this, null, 2);
       fs.writeFileSync(path, embeddings_serialized);
       console.log("Serialized embeddings successfully.");
+  }
+
+  static loadCorpus(path) {
+    console.log("Loading corpus from "+path+"...");
+    let corpus = fs.readFileSync(path).toString();
+    // clean-up corpus
+    console.log("Cleansing corpus...");
+    corpus = corpus.replace(/[^A-Za-z\s.;:]/g, ""); // sanitize
+    corpus = corpus.replace(/[,]\s?/g, ' '); // ignore commas
+    corpus = corpus.replace(/[:]\s?/g, ' '); // part : part as one sentence
+    corpus = corpus.replace(/[.;]\s?/g, '.'); // . ; treated the same
+    corpus = corpus.replace(/\s+/g, ' '); // clear excess white-space
+    console.log("Loaded corpus from "+path+"...");
+    return corpus;
   }
 
 }

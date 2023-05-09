@@ -1,5 +1,6 @@
 import * as math from 'mathjs';
 import LineByLine from 'n-readlines';
+import fs from 'fs';
 
 export class DataSet {
 

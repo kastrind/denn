@@ -4,7 +4,6 @@ import { Activation } from './Activation';
 import { DataSet } from './DataSet';
 import { Embeddings } from './Embeddings';
 
-
 let corpus = "Alpha beta gamma delta. One two three four. Black brown green red white blue yellow.";
 let dimensions = 5;
 let formation = [{"neurons": 64, "dropout": 0.0}];
@@ -14,7 +13,7 @@ let learning_rate = 1, epochs = 1000, batch_size = 1, error_threshold = 0.015, v
 let embeddings = new Embeddings(corpus, dimensions);
 embeddings.train(formation, learning_rate, Activation.sigmoid, epochs, batch_size, error_threshold, verbose);
 
-embeddings.serializeAll('embeddings.json');
+embeddings.serialize('embeddings.json');
 */
 
 
@@ -51,7 +50,7 @@ DataSet.normalize(datasetXY.X);
 let X = train_test.train.X;
 let Y = train_test.train.Y_one_hot;
 
-/*
+
 // console.log(trainSet[0]);
 // console.log(datasetXY.X[0]);
 // console.log(datasetXY.Y[0]);
@@ -73,7 +72,7 @@ nn.train(epochs, batch_size, error_threshold, verbose);
 nn.serialize('./lm.json');
 
 nn.test(X, Y, true);
-*/
+
 
 // Load model from a file
 var nn2 = Denn.deserialize('./lm.json');

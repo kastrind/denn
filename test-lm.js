@@ -1,12 +1,24 @@
 import * as math from 'mathjs';
 import { Denn } from './Denn';
 
-let embeddings = require('./embeddings.json');
+const projectName = 'Misc';
+const embeddings = require(`./assets/${projectName}/embeddings.json`);
+const sentences = require(`./assets/${projectName}/sentences.json`);
+const onehot_to_labels = require(`./assets/${projectName}/onehot2labels.json`);
+
+let label2Sentences = {};
+
+// Form the label 2 sentences mapping
+sentences.sentences.forEach((sentence, sIdx) => {
+	sentence = sentence.toLowerCase();
+	let sentenceLabel = "s"+sIdx;
+	label2Sentences[sentenceLabel] = sentence;
+});
 
 // Load model from a file
-var nn = Denn.deserialize('./lm.json');
+let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
-let queries = ["alpha gamma", "one two four", "black green white crimson"];
+let queries = ["rain", "river", "stew"];
 queries.forEach(query => {
   console.log(`Query: ${query}`);
   query = query.toLowerCase();
@@ -18,14 +30,12 @@ queries.forEach(query => {
   queryTerms.forEach(term => {
     if (!prevQueryTerms.includes(term) && embeddings.dictionaryEmbeddings[term]) {
       queryTermEmbedding = embeddings.dictionaryEmbeddings[term];
-      answer = nn.predict([queryTermEmbedding]);
-      console.log(Math.ceil(math.max(nn.output[0])/0.2));
+      answer = nn.predict([queryTermEmbedding], onehot_to_labels);
       for (let c=0; c<Math.ceil(math.max(nn.output[0])/0.2); c++) { answers.push(answer[0]); }
       prevQueryTerms.push(term);
     }
   });
   if (answers.length) {
-    console.log(answers);
     console.log(`Answer: ${label2Sentences[mode(answers)]}`);
   }
 
