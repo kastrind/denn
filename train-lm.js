@@ -3,7 +3,7 @@ import { Activation } from './Activation';
 import { DataSet } from './DataSet';
 import fs from 'fs';
 
-const projectName = 'Misc';
+const projectName = 'Test2';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const dimensions = embeddings.dimensions;
 const sentences = require(`./assets/${projectName}/sentences.json`);
@@ -18,8 +18,11 @@ sentences.sentences.forEach((sentence, sIdx) => {
   let sentenceLabel = "s"+sIdx;
   label2Sentences[sentenceLabel] = sentence;
   for (let i=0; i<terms.length; i++) {
+    let augmentTimes = Math.min(20, Math.floor(embeddings.maxFrequency / embeddings.dictionary[terms[i]])-1);
     //console.log(terms[i]);
-    trainSet.push(embeddings.dictionaryEmbeddings[terms[i]].concat([sentenceLabel])); 
+    for (augmentTimes; augmentTimes>0; augmentTimes--) {
+      trainSet.push(embeddings.dictionaryEmbeddings[terms[i]].concat([sentenceLabel])); 
+    }
   }
 });
 
@@ -37,8 +40,8 @@ DataSet.normalize(datasetXY.X);
 let X = train_test.train.X;
 let Y = train_test.train.Y_one_hot;
 
-let formation = [{"neurons": 64, "dropout": 0.0},{"neurons": 16, "dropout": 0.0}];
-let learning_rate = 1, epochs = 10000, batch_size = 30, error_threshold = 0.02, verbose = true;
+let formation = [{"neurons": 128, "dropout": 0.0},{"neurons": 16, "dropout": 0.0}];
+let learning_rate = 1, epochs = 1000, batch_size = 5, error_threshold = 0.03, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
 let nn = new Denn(X, Y, formation, learning_rate, Activation.relu);
