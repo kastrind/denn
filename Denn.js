@@ -252,6 +252,8 @@ export class Denn {
         }
         this.input = input;
         this.feedforward();
+        //console.log(this.input);
+        //console.log(this.output);
         //return this.output;
         let that = this;
         let output = [], onehot_array = [];

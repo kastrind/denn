@@ -1,5 +1,6 @@
 import { Denn } from './Denn';
 import fs from 'fs';
+import { DataSet } from './DataSet';
 
 export class Embeddings {
 
@@ -42,6 +43,9 @@ export class Embeddings {
         if (i+2 < terms.length) {
           adjacencyPairsForward.push({x: term, y: terms[i+2]});
         }
+        if (i+3 < terms.length) {
+          adjacencyPairsForward.push({x: term, y: terms[i+3]});
+        }
       }
     });
 
@@ -53,8 +57,8 @@ export class Embeddings {
     // generate initial vectors for each dictionary term
     Object.keys(this.dictionary).forEach((term, idx) =>
     {
-      let termVector = Array.from({length: this.dimensions}, (x, i) => 0);
       let bucket = idx%buckets + 1;
+      let termVector = Array.from({length: this.dimensions}, (x, i) => Math.random()*(bucket/(buckets*5)));
       termVector[idx%this.dimensions] = bucket/buckets;
       this.dictionaryVectors[term] = termVector;
     });
@@ -72,14 +76,16 @@ export class Embeddings {
     // build the embeddings training set
     this.adjacencyPairs.forEach(pair =>
     {
-      let augmentTimesX = Math.min(20, Math.floor(this.maxFrequency / this.dictionary[pair.x])-1);
-      let augmentTimesY = Math.min(20, Math.floor(this.maxFrequency / this.dictionary[pair.y])-1);
+      let augmentTimesX = Math.min(2, Math.floor(this.maxFrequency / this.dictionary[pair.x])-1);
+      let augmentTimesY = Math.min(2, Math.floor(this.maxFrequency / this.dictionary[pair.y])-1);
       let augmentTimes = Math.min(augmentTimesX, augmentTimesY);
       let row = this.dictionaryVectors[pair.x].concat(this.dictionaryVectors[pair.y]);
       for (augmentTimes; augmentTimes>0; augmentTimes--) {
         this.trainSet.push(row);
       }
     });
+
+    //DataSet.normalize(this.trainSet);
 
   }
 

@@ -3,7 +3,7 @@ import { Activation } from './Activation';
 import { DataSet } from './DataSet';
 import fs from 'fs';
 
-const projectName = 'ThreeLittlePigs';
+const projectName = 'Test2';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const dimensions = embeddings.dimensions;
 const sentences = require(`./assets/${projectName}/sentences.json`);
@@ -18,13 +18,18 @@ sentences.sentences.forEach((sentence, sIdx) => {
   let sentenceLabel = "s"+sIdx;
   label2Sentences[sentenceLabel] = sentence;
   for (let i=0; i<terms.length; i++) {
-    let augmentTimes = Math.min(20, Math.floor(embeddings.maxFrequency / embeddings.dictionary[terms[i]])-1);
-    //console.log(terms[i]);
+    let augmentTimes = Math.min(2, Math.floor(embeddings.maxFrequency / embeddings.dictionary[terms[i]])-1);
+    console.log(augmentTimes+": "+terms[i]+" => "+sentence);
     for (augmentTimes; augmentTimes>0; augmentTimes--) {
       trainSet.push(embeddings.dictionaryEmbeddings[terms[i]].concat([sentenceLabel])); 
     }
   }
 });
+
+console.log(label2Sentences);
+
+// Shuffle the dataset
+trainSet = DataSet.shuffle(trainSet);
 
 // Separate input features from output variables and get a mapping of one-hot representation to the categorical values of the output
 let onehot_to_labels = {};
@@ -40,8 +45,8 @@ let train_test = DataSet.separateTrainTest(datasetXY, 0);
 let X = train_test.train.X;
 let Y = train_test.train.Y_one_hot;
 
-let formation = [{"neurons": 96, "dropout": 0.0}];
-let learning_rate = 10, epochs = 2000, batch_size = 100, error_threshold = 0.03, verbose = true;
+let formation = [{"neurons": 10, "dropout": 0.0}];
+let learning_rate = 1, epochs = 1000, batch_size = 50, error_threshold = 0.03, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
 let nn = new Denn(X, Y, formation, learning_rate, Activation.relu);
