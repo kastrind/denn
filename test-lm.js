@@ -20,6 +20,7 @@ let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
 let queries = ["mother pig", "house of straw", "huffed and puffed", "boil in the fireplace", "enter through the chimney"];
 //let queries = ["owl", "dog", "cow"];
+//let queries = ["open account", "setup account", "cancel account"];
 queries.forEach(query => {
   console.log(`Query: ${query}`);
   query = query.toLowerCase();
@@ -28,11 +29,15 @@ queries.forEach(query => {
   let answer;
   let answers = [];
   let prevQueryTerms = [];
+  let maxConf;
   queryTerms.forEach(term => {
     if (!prevQueryTerms.includes(term) && embeddings.dictionaryEmbeddings[term]) {
       queryTermEmbedding = embeddings.dictionaryEmbeddings[term];
       answer = nn.predict([queryTermEmbedding], onehot_to_labels);
-      for (let c=0; c<Math.ceil(math.max(nn.output[0])/0.2); c++) { answers.push(answer[0]); }
+      maxConf = math.max(nn.output[0]);
+      if (maxConf > 0.5) {
+        for (let c=0; c<Math.ceil(maxConf/0.3); c++) { answers.push(answer[0]); }
+      }
       prevQueryTerms.push(term);
     }
   });

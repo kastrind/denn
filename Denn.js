@@ -188,8 +188,11 @@ export class Denn {
         let X = this.input;
         let y = this.Y;
         let epoch_mean_error = 0;
-        let early_stopping_tolerance = 3;
+        let early_stopping_tolerance = Math.min(3, Math.floor(epochs/10));
         let early_stopping_cnt = 0;
+        let early_stopping_tolerance_low_error_drop = Math.min(10, Math.floor(epochs/10));
+        let early_stopping_cnt_low_error_drop = 0;
+        let epoch_mean_error_prev = 1;
 
         for (var i=0; i<epochs; i++) {
             let start_i = 0, stop_i = 0;
@@ -232,7 +235,18 @@ export class Denn {
                 if (verbose) console.log("Early stopping to avoid over-fitting.");
                 break;
             }
+            if (epoch_mean_error_prev - epoch_mean_error < 0.00001 ||
+                epoch_mean_error_prev - epoch_mean_error < 0) {
+                early_stopping_cnt_low_error_drop++;
+            }else {
+                early_stopping_cnt_low_error_drop = 0;
+            }
+            if (early_stopping_cnt_low_error_drop == early_stopping_tolerance_low_error_drop) {
+                if (verbose) console.log("Early stopping to avoid over-fitting.");
+                break;
+            }
             batch_cnt = 0;
+            epoch_mean_error_prev = epoch_mean_error;
             epoch_mean_error = 0;
         }
         this.X = this.input = X;
