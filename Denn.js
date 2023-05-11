@@ -64,7 +64,7 @@ export class Denn {
         }
     }
 
-    backprop(epoch_idx) {
+    backprop(epoch_idx, epochs) {
         for (var i=this.layers.length-1; i>=0; i--) {
             if (i==this.layers.length-1) {
                 this.layers[i].error = math.subtract(this.Y, this.output);
@@ -77,9 +77,9 @@ export class Denn {
         }
         //update the weights
         for (var i=this.layers.length-1; i>=1; i--) {
-            this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), math.multiply(this.layers[i].delta, math.max(0.0001, this.learning_rate*(1-epoch_idx*0.0001)))));
+            this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), math.multiply(this.layers[i].delta, math.max(0.1, this.learning_rate*(1-epoch_idx/epochs)))));
         }
-        this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), math.multiply(this.layers[0].delta, math.max(0.0001, this.learning_rate*(1-epoch_idx*0.0001)))));
+        this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), math.multiply(this.layers[0].delta, math.max(0.1, this.learning_rate*(1-epoch_idx/epochs)))));
     }
 
     dropout() {
@@ -206,7 +206,7 @@ export class Denn {
                     
                     if (i>0) this.dropout();
                     this.feedforward();
-                    this.backprop(i);
+                    this.backprop(i, epochs);
                     if (i>0) this.dropoutRestore();
 
                     batch_squared_errors = math.subtract(this.Y, this.output);

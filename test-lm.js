@@ -1,7 +1,7 @@
 import * as math from 'mathjs';
 import { Denn } from './Denn';
 
-const projectName = 'Test2';
+const projectName = 'ThreeLittlePigs';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const sentences = require(`./assets/${projectName}/sentences.json`);
 const onehot_to_labels = require(`./assets/${projectName}/onehot2labels.json`);
@@ -18,7 +18,7 @@ sentences.sentences.forEach((sentence, sIdx) => {
 // Load model from a file
 let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
-let queries = ["wolf huffed", "house of straw", "house of bricks and cement"];
+let queries = ["old mother", "wolf huffed", "come down", "water"];
 queries.forEach(query => {
   console.log(`Query: ${query}`);
   query = query.toLowerCase();

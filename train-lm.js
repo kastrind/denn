@@ -3,7 +3,7 @@ import { Activation } from './Activation';
 import { DataSet } from './DataSet';
 import fs from 'fs';
 
-const projectName = 'Test2';
+const projectName = 'ThreeLittlePigs';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const dimensions = embeddings.dimensions;
 const sentences = require(`./assets/${projectName}/sentences.json`);
@@ -35,13 +35,13 @@ fs.writeFileSync(`./assets/${projectName}/onehot2labels.json`, JSON.stringify(on
 let train_test = DataSet.separateTrainTest(datasetXY, 0);
 
 // Normalize dataset
-DataSet.normalize(datasetXY.X);
+//DataSet.normalize(datasetXY.X);
 
 let X = train_test.train.X;
 let Y = train_test.train.Y_one_hot;
 
-let formation = [{"neurons": 128, "dropout": 0.0},{"neurons": 16, "dropout": 0.0}];
-let learning_rate = 1, epochs = 1000, batch_size = 5, error_threshold = 0.03, verbose = true;
+let formation = [{"neurons": 96, "dropout": 0.0}];
+let learning_rate = 10, epochs = 2000, batch_size = 100, error_threshold = 0.03, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
 let nn = new Denn(X, Y, formation, learning_rate, Activation.relu);
@@ -51,4 +51,4 @@ nn.train(epochs, batch_size, error_threshold, verbose);
 // Save model to a file
 nn.serialize(`./assets/${projectName}/lm.json`);
 
-nn.test(X, Y, true);
+//nn.test(X, Y, true);
