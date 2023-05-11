@@ -18,7 +18,8 @@ sentences.sentences.forEach((sentence, sIdx) => {
 // Load model from a file
 let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
-let queries = ["boil in the fireplace", "enter through the chimney"];
+let queries = ["mother pig", "house of straw", "huffed and puffed", "boil in the fireplace", "enter through the chimney"];
+//let queries = ["owl", "dog", "cow"];
 queries.forEach(query => {
   console.log(`Query: ${query}`);
   query = query.toLowerCase();
@@ -36,7 +37,7 @@ queries.forEach(query => {
     }
   });
   if (answers.length) {
-    console.log(answers);
+    //console.log(answers);
     console.log(`Answer: ${label2Sentences[mode(answers)]}`);
   }
 

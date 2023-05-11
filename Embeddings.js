@@ -32,19 +32,10 @@ export class Embeddings {
       for (let i=0; i<terms.length; i++) {
         let term = terms[i];
         this.dictionary[term] = this.dictionary[term] ? this.dictionary[term]+1 : 1;
-        // for (let j=i; j<terms.length; j++) {
-        //   if (j+1 < terms.length) {
-        //     adjacencyPairsForward.push({x: term, y: terms[j+1]});
-        //   }
-        // }
-        if (i+1 < terms.length) {
-          adjacencyPairsForward.push({x: term, y: terms[i+1]});
-        }
-        if (i+2 < terms.length) {
-          adjacencyPairsForward.push({x: term, y: terms[i+2]});
-        }
-        if (i+3 < terms.length) {
-          adjacencyPairsForward.push({x: term, y: terms[i+3]});
+        for (let j=i; j<i+3; j++) {
+          if (j+1 < terms.length) {
+            adjacencyPairsForward.push({x: term, y: terms[j+1]});
+          }
         }
       }
     });
@@ -76,16 +67,13 @@ export class Embeddings {
     // build the embeddings training set
     this.adjacencyPairs.forEach(pair =>
     {
-      let augmentTimesX = Math.min(2, Math.floor(this.maxFrequency / this.dictionary[pair.x])-1);
-      let augmentTimesY = Math.min(2, Math.floor(this.maxFrequency / this.dictionary[pair.y])-1);
-      let augmentTimes = Math.min(augmentTimesX, augmentTimesY);
       let row = this.dictionaryVectors[pair.x].concat(this.dictionaryVectors[pair.y]);
-      for (augmentTimes; augmentTimes>0; augmentTimes--) {
+      if (Math.floor(this.maxFrequency / this.dictionary[pair.x]) > 1 &&
+          Math.floor(this.maxFrequency / this.dictionary[pair.y]) > 1
+      ) {
         this.trainSet.push(row);
       }
     });
-
-    //DataSet.normalize(this.trainSet);
 
   }
 
