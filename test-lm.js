@@ -28,6 +28,8 @@ queries.forEach(query => {
   let queryTermEmbedding = [];
   let answer;
   let answers = [];
+  let runnerups = [];
+  let answerConfs = {};
   let prevQueryTerms = [];
   let maxConf;
   queryTerms.forEach(term => {
@@ -35,15 +37,20 @@ queries.forEach(query => {
       queryTermEmbedding = embeddings.dictionaryEmbeddings[term];
       answer = nn.predict([queryTermEmbedding], onehot_to_labels);
       maxConf = math.max(nn.output[0]);
-      if (maxConf > 0.5) {
-        for (let c=0; c<Math.ceil(maxConf/0.3); c++) { answers.push(answer[0]); }
+      if (maxConf >= 0.9) {
+        answers.push(answer[0]);
       }
+      answerConfs[answer] = answerConfs[answer] ? answerConfs[answer] + maxConf : maxConf;
       prevQueryTerms.push(term);
     }
   });
   if (answers.length) {
-    //console.log(answers);
-    console.log(`Answer: ${label2Sentences[mode(answers)]}`);
+    console.log(`Answer (high conf.): ${label2Sentences[mode(answers)]}`);
+  } else {
+    answerConfs = Object.fromEntries(
+      Object.entries(answerConfs).sort(([,a],[,b]) => b-a)
+    );
+    console.log(`Answer (max conf.): ${label2Sentences[Object.keys(answerConfs)[0]]}`);
   }
 
 });
