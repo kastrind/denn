@@ -123,9 +123,9 @@ export class DataSet {
      * Separates X from Y features from a data set and returns them in an object.
      * @param {Array} data The imported data set.
      * @param {Integer} Y_index The index of the output feature (default: the index of the last feature element of a row).
-     * @param {Boolean} one_hot Whether to provide a one-hot representation of the output feature as well.
+     * @param {String} output_encoding 'ONEHOT', 'BINARY' or 'NONE representation of the output feature (default: 'NONE').
      */
-    static separateXY(data, Y_index, one_hot, onehot_to_labels) {
+    static separateXY(data, Y_index, output_encoding='NONE', encoding_to_label_map) {
         if (!data || !data.length) return { X: [], Y: [] };
         Y_index = Number.isNaN(Y_index) ? (data[0].length - 1) : Y_index;
         let X = [], Y = [], labels = [];
@@ -144,14 +144,23 @@ export class DataSet {
             Y.push(row[Y_index]);
             labels[row[Y_index]] = 1;
         });
-        if (one_hot) {
+        if (output_encoding=='ONEHOT') {
             let labelsToOneHot = DataSet.labelsToOneHot(Object.keys(labels));
-            DataSet.oneHotToLabels(labelsToOneHot, onehot_to_labels);
+            DataSet.oneHotToLabels(labelsToOneHot, encoding_to_label_map);
             let Y_one_hot = [];
             Y.forEach((label) => {
                 Y_one_hot.push(labelsToOneHot[label]);
             });
             return { X: X, Y: Y, Y_one_hot: Y_one_hot};
+
+        } else if (output_encoding=='BINARY') {
+            let labelsToBinary = DataSet.labelsToBinary(Object.keys(labels));
+            DataSet.binaryToLabels(labelsToBinary, encoding_to_label_map);
+            let Y_bin = [];
+            Y.forEach((label) => {
+                Y_bin.push(labelsToBinary[label]);
+            });
+            return { X: X, Y: Y, Y_bin: Y_bin};
         }
         return { X: X, Y: Y};
     }
@@ -191,15 +200,18 @@ export class DataSet {
         }
         let tt = { train: { X: [], Y: [] }, test: { X: [], Y: [] } };
         if (data.Y_one_hot) { tt.train["Y_one_hot"] = []; tt.test["Y_one_hot"] = []; }
+        else if (data.Y_bin) { tt.train["Y_bin"] = []; tt.test["Y_bin"] = []; }
         data.X.forEach((elem, i) => {
             if (test_indexes.includes(i)) {
                 tt.test.X.push(data.X[i]);
                 tt.test.Y.push(data.Y[i]);
                 if (data.Y_one_hot) { tt.test.Y_one_hot.push(data.Y_one_hot[i]); }
+                else if (data.Y_bin) { tt.test.bin.push(data.Y_bin[i]); }
             }else {
                 tt.train.X.push(data.X[i]);
                 tt.train.Y.push(data.Y[i]);
                 if (data.Y_one_hot) { tt.train.Y_one_hot.push(data.Y_one_hot[i]); }
+                else if (data.Y_bin) { tt.train.Y_bin.push(data.Y_bin[i]); }
             }
         });
         return tt;

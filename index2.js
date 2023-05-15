@@ -26,7 +26,7 @@ let formation = [{"neurons": 64, "dropout": 0}, {"neurons": 64, "dropout": 0}];
 let learning_rate = 0.01;
 
 // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
-var nn = new Denn(X, Y, formation, learning_rate, Activation.relu);
+var nn = new Denn(X, Y, formation, learning_rate, Activation.relu, 'ONEHOT', onehot_to_labels);
 
 // Train DNN
 let epochs = 200, batch_size = 1, error_threshold = 0.003, verbose = true;

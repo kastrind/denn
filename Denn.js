@@ -1,5 +1,6 @@
 import * as math from 'mathjs';
 import { Activation } from './Activation';
+import { Utils } from './Utils';
 import fs from 'fs';
 
 /**
@@ -7,7 +8,7 @@ import fs from 'fs';
  */
 export class Denn {
 
-    constructor(X, Y, formation, learning_rate, activation_function, initialized) {
+    constructor(X, Y, formation, learning_rate, activation_function=Activation.sigmoid, outputEncoding='NONE', encoding_to_label_map={}, initialized=false) {
         if (!Denn.checkXY(X, Y)) { return null; }
         this.input = X;
         this.X = X;
@@ -19,6 +20,8 @@ export class Denn {
         this.learning_rate = learning_rate;
         this.activation = activation_function;
         this.activationName = activation_function.name;
+        this.outputEncoding = outputEncoding === 'ONEHOT' || outputEncoding === 'BINARY' ? outputEncoding : 'NONE';
+        this.encoding_to_label_map = encoding_to_label_map;
         this.initLayers();
     }
 
@@ -31,7 +34,14 @@ export class Denn {
         let nn_raw = fs.readFileSync(path);
         let nn_deserialized = JSON.parse(nn_raw);
         let activations = {"sigmoid": Activation.sigmoid, "relu": Activation.relu};
-        var nn = new Denn(nn_deserialized.X, nn_deserialized.Y, nn_deserialized.formation, nn_deserialized.learning_rate, activations[nn_deserialized.activationName], true);
+        var nn = new Denn(nn_deserialized.X,
+                          nn_deserialized.Y,
+                          nn_deserialized.formation,
+                          nn_deserialized.learning_rate,
+                          activations[nn_deserialized.activationName],
+                          nn_deserialized.outputEncoding,
+                          nn_deserialized.encoding_to_label_map,
+                          true);
         nn.input = nn_deserialized.input;
         nn.output = nn_deserialized.output;
         nn.layers = nn_deserialized.layers;
@@ -237,7 +247,7 @@ export class Denn {
             }
             if (epoch_mean_error_prev - epoch_mean_error < 0.01*this.learning_rate/epochs ||
                 epoch_mean_error_prev - epoch_mean_error < 0) {
-                early_stopping_cnt_low_error_drop++;
+                //early_stopping_cnt_low_error_drop++;
             }else {
                 early_stopping_cnt_low_error_drop = 0;
             }
@@ -257,9 +267,8 @@ export class Denn {
     /**
      * Predicts output for a given tuple of 
      * @param {Array} input The input features array.
-     * @param {Object} onehot_to_labels Mappings of one-hot representation of the output to their respective categorical values.
      */
-    predict(input, onehot_to_labels) {
+    predict(input) {
         if (!input || !input.length) {
             console.error("Error: no input for prediction.");
             return null;
@@ -270,27 +279,26 @@ export class Denn {
         //console.log(this.output);
         //return this.output;
         let that = this;
-        let output = [], onehot_array = [];
-        let max_i = -1;
-        let curr_key = "";
+        let output = [];
 
-        this.output.forEach(function (row, i, arr) {
-            onehot_array = math.zeros(row.length)._data;
-            max_i = that.maxIndex(row);
-            onehot_array[max_i] = 1;
-            //if one-hot representation to label mapping is provided, return labels
-            if (onehot_to_labels) {
-                curr_key = "";
-                onehot_array.forEach( (elem) => {
-                    curr_key += elem;
-                });
-                output.push(onehot_to_labels[curr_key]);
-            //else return one-hot representation
-            }else {
-                output.push(onehot_array);
-            }
+        if (this.outputEncoding === 'ONEHOT') {
+            let onehot_array = [];
+            let max_i = -1;
+            this.output.forEach(function (row, i, arr) {
+                onehot_array = math.zeros(row.length)._data;
+                max_i = that.maxIndex(row);
+                onehot_array[max_i] = 1;
+                output.push(that.encoding_to_label_map[onehot_array.join('')]);
+            });
 
-        });
+        }else if (this.outputEncoding === 'BINARY') {
+            this.output.forEach(function (row, i, arr) {
+                output.push(that.encoding_to_label_map[row.toBinary(0.1).join('')]);
+            });
+
+        }else { // this.outputEncoding === 'NONE'
+            return this.output;
+        }
         return output;
     }
 
@@ -310,9 +318,21 @@ export class Denn {
         let report = "\nTESTING - start\n";
         let that = this;
         this.output.forEach(function (row, i, arr) {
-            if (that.maxIndex(row) === that.maxIndex(Y[i])) {
-                success=true;
-                hits++;
+            if (that.outputEncoding === 'ONEHOT') {
+                if (that.maxIndex(row) === that.maxIndex(Y[i])) {
+                    success=true;
+                    hits++;
+                }
+            }else if (that.outputEncoding === 'BINARY') {
+                if (row.toBinary(0.1).join('') === Y[i].join('')) {
+                    success=true;
+                    hits++;
+                }
+            }else { // that.outputEncoding === 'NONE'
+                if (row.join('') === Y[i].join('')) {
+                    success=true;
+                    hits++;
+                }
             }
             if (verbose) { report += "expected: "+Y[i]+", actual: "+row+", successful: "+success+", current hits: "+hits+"\n"; }
             success=false;
@@ -341,13 +361,16 @@ export class Denn {
     /**
      * Serializes the model to a file in the given path.
      * @param {String} path  The path.
+     * @param {Boolean} finalize  If true, no further training can be resumed because input, output, X and Y are emptied
      */
-    serialize(path) {
+    serialize(path, finalize=false) {
         console.log("Serializing model to "+path+"...");
-        this.input = [[]];
-        this.output = 0;
-        this.X = [[]];
-        this.Y = [[]];
+        if (finalize) {
+            this.input = [[]];
+            this.output = 0;
+            this.X = [[]];
+            this.Y = [[]];
+        }
         let nn_serialized = JSON.stringify(this);
         fs.writeFileSync(path, nn_serialized);
         console.log("Serialized model successfully.");

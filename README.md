@@ -41,7 +41,7 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
 
     // Instantiate DNN with a training set, architecture, learning rate and activation function
     // of its hidden layer(s)
-    var nn = new Denn(X, Y, formation, learning_rate, Activation.relu);
+    var nn = new Denn(X, Y, formation, learning_rate, Activation.relu, 'ONEHOT', onehot_to_labels);
 
     // Train DNN
     let epochs = 100, batch_size = 1, error_threshold = 0.02, verbose = true;

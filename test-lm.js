@@ -40,7 +40,7 @@ queries.forEach(query => {
       queryTermEmbedding = embeddings.dictionaryEmbeddings[term];
       //answer = nn.predict([queryTermEmbedding], onehot_to_labels);
       answer = nn.predict([queryTermEmbedding]);
-      console.log(answer);
+      // console.log(answer);
       //console.log(term);
       answerBinary = nn.output[0].toBinary(0.1).join('');
       answerLabel = binary2labels[answerBinary];

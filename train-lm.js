@@ -66,7 +66,7 @@ let formation = [{"neurons": 22, "dropout": 0.0}];
 let learning_rate = 1, epochs = 4000, batch_size = 20, error_threshold = 0.03, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
-let nn = new Denn(X, Y, formation, learning_rate, Activation.relu);
+let nn = new Denn(X, Y, formation, learning_rate, Activation.relu, 'NONE');
 // Train DNN
 nn.train(epochs, batch_size, error_threshold, verbose);
 
