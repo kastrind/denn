@@ -344,6 +344,10 @@ export class Denn {
      */
     serialize(path) {
         console.log("Serializing model to "+path+"...");
+        this.input = [[]];
+        this.output = 0;
+        this.X = [[]];
+        this.Y = [[]];
         let nn_serialized = JSON.stringify(this);
         fs.writeFileSync(path, nn_serialized);
         console.log("Serialized model successfully.");

@@ -1,5 +1,7 @@
 import * as math from 'mathjs';
+import { DataSet } from './DataSet';
 import { Denn } from './Denn';
+import { Utils } from './Utils';
 
 const projectName = 'Test2';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
@@ -15,13 +17,6 @@ sentences.sentences.forEach((sentence, sIdx) => {
 	let sentenceLabel = "s"+sIdx;
 	label2Sentences[sentenceLabel] = sentence;
 });
-
-Array.prototype.toBinary = function(threshold) {
-  for (let i=0; i < this.length; i++) {
-    this[i] = this[i] >= threshold ? 1 : 0;
-  }
-  return this;
-};
 
 // Load model from a file
 let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
@@ -54,13 +49,6 @@ queries.forEach(query => {
     }
   });
   if (answers.length) {
-    console.log(`Answer: ${label2Sentences[mode(answers)]}`);
+    console.log(`Answer: ${label2Sentences[DataSet.mode(answers)]}`);
   }
 });
-
-function mode(arr){
-  return arr.sort((a,b) =>
-        arr.filter(v => v===a).length
-      - arr.filter(v => v===b).length
-  ).pop();
-};

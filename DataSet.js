@@ -21,36 +21,85 @@ export class DataSet {
     }
 
     /**
+     * Finds the mode of an array.
+     * @param {Array} arr the input array.
+     * @returns the mode element of the input array.
+     */
+    static mode(arr) {
+        return arr.sort((a,b) =>
+            arr.filter(v => v===a).length
+          - arr.filter(v => v===b).length
+        ).pop();
+    };
+
+    /**
+     * Maps a categorical set to binary representation.
+     * @param {Array} labels_array An array containing the categorical values.
+     * @return {Object} mapping from categorical values to their respective binary array representation.
+     */
+    static labelsToBinary(labels_array) {
+        let numLabelBits = labels_array.length.toString(2).length;
+        let label_to_bin_map = {};
+        let idx_bin_arr;
+        let idx_bin;
+        let idx_num_bits;
+        labels_array.forEach((elem, idx, arr) => {
+            idx_bin_arr = [];
+            idx_bin = parseInt(idx).toString(2);
+            idx_num_bits = idx_bin.length;
+            for (let i = idx_num_bits; i < numLabelBits; i++) {
+                idx_bin_arr.push(0);
+            }
+            idx_bin.split('').forEach(elem => idx_bin_arr.push(parseInt(elem)) );
+            label_to_bin_map[elem] = idx_bin_arr;
+            });
+        return label_to_bin_map;
+    }
+
+    /**
      * Maps a categorical set to one-hot representation.
      * @param {Array} labels_array An array containing the categorical values.
+     * @return {Object} mapping from categorical values to their respective one-hot array representation.
      */
     static labelsToOneHot(labels_array) {
-        let onehot_arrays = {};
+        let label_to_onehot_map = {};
+        let onehot_array;
         labels_array.forEach((elem, i, arr) => {
-            let onehot_array = math.zeros(arr.length)._data;
+            onehot_array = math.zeros(arr.length)._data;
             onehot_array[arr.length -1 - i] = 1;
-            onehot_arrays[elem] = onehot_array;
+            label_to_onehot_map[elem] = onehot_array;
         });
-        return onehot_arrays;
+        return label_to_onehot_map;
     }
 
     /**
      * Maps a one-hot set to categorical value representation.
-     * @param {Array} onehot_arrays An array containing the one-hot representation of categorical values.
-     * @param {Object} label_arrays where the mapping will be assigned; provide an empty object initially.
+     * @param {Array} label_to_bin_map An array containing the one-hot representation of categorical values.
+     * @param {Object} bin_to_label_map where the mapping will be assigned; provide an empty object initially. Example mapping: { '10': 's3', '01': 's2', '00': 's1' }
      */
-    static oneHotToLabels(onehot_arrays, label_arrays) {
+    static binaryToLabels(label_to_bin_map, bin_to_label_map) {
+        Object.keys(label_to_bin_map).forEach( (label) => {
+            bin_to_label_map[label_to_bin_map[label].join('')] = label;
+        });
+        return bin_to_label_map;
+    }
+
+    /**
+     * Maps a one-hot set to categorical value representation.
+     * @param {Array} label_to_onehot_map An array containing the one-hot representation of categorical values.
+     * @param {Object} onehot_to_label_map where the mapping will be assigned; provide an empty object initially. Example mapping: { '100': 's3', '010': 's2', '001': 's1' }
+     */
+    static oneHotToLabels(label_to_onehot_map, onehot_to_label_map) {
         let curr_key = "";
-        //let label_arrays = {};
-        Object.keys(onehot_arrays).forEach( (label) => {
-            let oh_arr = onehot_arrays[label];
+        Object.keys(label_to_onehot_map).forEach( (label) => {
+            let oh_arr = label_to_onehot_map[label];
             oh_arr.forEach( (elem) => {
                 curr_key += elem;
             });
-            label_arrays[curr_key] = label;
+            onehot_to_label_map[curr_key] = label;
             curr_key = "";
         });
-        return label_arrays;
+        return onehot_to_label_map;
     }
 
     /**
