@@ -237,7 +237,7 @@ export class Denn {
             }
             if (epoch_mean_error_prev - epoch_mean_error < 0.00001 ||
                 epoch_mean_error_prev - epoch_mean_error < 0) {
-                early_stopping_cnt_low_error_drop++;
+                //early_stopping_cnt_low_error_drop++;
             }else {
                 early_stopping_cnt_low_error_drop = 0;
             }
@@ -345,7 +345,6 @@ export class Denn {
     serialize(path) {
         console.log("Serializing model to "+path+"...");
         let nn_serialized = JSON.stringify(this);
-        this.X
         fs.writeFileSync(path, nn_serialized);
         console.log("Serialized model successfully.");
     }
