@@ -191,7 +191,7 @@ export class Denn {
      * @param {Integer} epochs Epochs
      * @param {Integer} batch_size The batch size 
      * @param {Float} error_threshold Error threshold below which early stopping triggers.
-     * @param {Boolean} Y Verbosity.
+     * @param {Boolean} verbose Verbosity
      */
     train(epochs, batch_size, error_threshold, verbose) {
         console.log("\nTRAINING - start");
@@ -200,7 +200,7 @@ export class Denn {
         let epoch_mean_error = 0;
         let early_stopping_tolerance = Math.min(3, Math.floor(epochs/10));
         let early_stopping_cnt = 0;
-        let early_stopping_tolerance_low_error_drop = Math.min(10, Math.floor(epochs/10));
+        let early_stopping_tolerance_low_error_drop = Math.min(5, Math.floor(epochs/10));
         let early_stopping_cnt_low_error_drop = 0;
         let epoch_mean_error_prev = 1;
 
@@ -245,9 +245,9 @@ export class Denn {
                 if (verbose) console.log("Early stopping to avoid over-fitting.");
                 break;
             }
-            if (epoch_mean_error_prev - epoch_mean_error < 0.01*this.learning_rate/epochs ||
-                epoch_mean_error_prev - epoch_mean_error < 0) {
-                //early_stopping_cnt_low_error_drop++;
+            if (i>0.5*epochs && (epoch_mean_error_prev - epoch_mean_error < 0.001*this.learning_rate/epochs ||
+                epoch_mean_error_prev - epoch_mean_error < 0)) {
+                early_stopping_cnt_low_error_drop++;
             }else {
                 early_stopping_cnt_low_error_drop = 0;
             }

@@ -28,7 +28,7 @@ let queries = ["mother", "chimney", "boil"];
 queries.forEach(query => {
   console.log(`Query: ${query}`);
   query = query.toLowerCase();
-  let queryTerms = query.split(" ");
+  let queryTerms = query.split(' ');
   let queryTermEmbedding = [];
   let answerBinary;
   let answerLabel;
