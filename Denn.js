@@ -235,9 +235,9 @@ export class Denn {
                 if (verbose) console.log("Early stopping to avoid over-fitting.");
                 break;
             }
-            if (epoch_mean_error_prev - epoch_mean_error < 0.00001 ||
+            if (epoch_mean_error_prev - epoch_mean_error < 0.01*this.learning_rate/epochs ||
                 epoch_mean_error_prev - epoch_mean_error < 0) {
-                //early_stopping_cnt_low_error_drop++;
+                early_stopping_cnt_low_error_drop++;
             }else {
                 early_stopping_cnt_low_error_drop = 0;
             }
