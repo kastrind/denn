@@ -1,9 +1,9 @@
 import { Activation } from './Activation';
 import { Embeddings } from './Embeddings';
 
-const projectName = 'Test2';
+const projectName = 'Test3';
 const dimensions = 10;
-let embeddings = new Embeddings(`assets/${projectName}/corpus.txt`, `assets/${projectName}/sentences.json`, dimensions);
+let embeddings = new Embeddings(`assets/${projectName}/corpusEmbeddings.txt`, dimensions);
 
 let formation = [{"neurons": 64, "dropout": 0.0}];
 let learning_rate = 1, epochs = 1000, batch_size = 10, error_threshold = 0.02, verbose = true;

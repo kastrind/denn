@@ -8,6 +8,7 @@ export class DataSet {
      * https://stackoverflow.com/a/6274381/2032235
      * Shuffles array in place.
      * @param {Array} a An array containing the items.
+     * @returns {Array} the array
      */
     static shuffle(a) {
         var j, x, i;
@@ -76,6 +77,7 @@ export class DataSet {
      * Maps a one-hot set to categorical value representation.
      * @param {Array} label_to_bin_map An array containing the one-hot representation of categorical values.
      * @param {Object} bin_to_label_map where the mapping will be assigned; provide an empty object initially. Example mapping: { '10': 's3', '01': 's2', '00': 's1' }
+     * @return {Object} bin_to_label_map
      */
     static binaryToLabels(label_to_bin_map, bin_to_label_map) {
         Object.keys(label_to_bin_map).forEach( (label) => {
@@ -88,6 +90,7 @@ export class DataSet {
      * Maps a one-hot set to categorical value representation.
      * @param {Array} label_to_onehot_map An array containing the one-hot representation of categorical values.
      * @param {Object} onehot_to_label_map where the mapping will be assigned; provide an empty object initially. Example mapping: { '100': 's3', '010': 's2', '001': 's1' }
+     * @return {Object} onehot_to_label_map
      */
     static oneHotToLabels(label_to_onehot_map, onehot_to_label_map) {
         let curr_key = "";
@@ -103,9 +106,10 @@ export class DataSet {
     }
 
     /**
-     * Imports a data set from a file having each case in a line and features separated by the specified separator.
+     * Imports a dataset from a file where each line corresponds to a case and features are separated by the specified separator.
      * @param {String} path_to_file  The input file path.
      * @param {String} separator The delimiter (default: comma).
+     * @return {Array} the dataset
      */
     static import(path_to_file, separator) {
         separator = separator || ',';
@@ -124,6 +128,7 @@ export class DataSet {
      * @param {Array} data The imported data set.
      * @param {Integer} Y_index The index of the output feature (default: the index of the last feature element of a row).
      * @param {String} output_encoding 'ONEHOT', 'BINARY' or 'NONE representation of the output feature (default: 'NONE').
+     * @return {Object} object with X and Y feature arrays, and optionally Y_onehot or Y_bin for 'ONEHOT' or 'BINARY' encoding respectively.
      */
     static separateXY(data, Y_index, output_encoding='NONE', encoding_to_label_map) {
         if (!data || !data.length) return { X: [], Y: [] };
@@ -166,7 +171,7 @@ export class DataSet {
     }
 
     /**
-     * Normalizes the provided data set.
+     * Normalizes the provided data set in place.
      * @param {Array} data The data set to normalize.
      */
     static normalize(data) {
@@ -184,6 +189,7 @@ export class DataSet {
      * Separates the resulting dataset object to a train set and a test set.
      * @param {Object} data The dataset object with X, Y and optionally Y_onehot property.
      * @param {Float} test_p The approximate portion [0 - 1] of the data that will be kept as a test set.
+     * @return {Object} the dataset object separated to train and test sets: { train: { X: [], Y: [], Y_onehot|Y_bin: [] }, test: { X: [], Y: [], Y_onehot|Y_bin: [] } }
      */
     static separateTrainTest(data, test_p) {
         if (!data || !data.hasOwnProperty('X') || !data.hasOwnProperty('Y')) return null;
@@ -216,5 +222,24 @@ export class DataSet {
         });
         return tt;
     }
+
+    /**
+     * Loads text from a path and filename and cleanses it.
+     * @param {String} path path and filaname of the corpus to load
+     * @returns {String} the cleansed corpus
+     */
+    static loadCorpus(path) {
+        console.log("Loading corpus from "+path+"...");
+        let corpus = fs.readFileSync(path).toString();
+        // clean-up corpus
+        console.log("Cleansing corpus...");
+        corpus = corpus.replace(/[^A-Za-z\s.;:!?]/g, ""); // sanitize
+        corpus = corpus.replace(/[,]\s?/g, ' '); // ignore commas
+        corpus = corpus.replace(/[:]\s?/g, ' '); // part : part as one sentence
+        corpus = corpus.replace(/[.;!?]\s?/g, '.'); // . ; ! ? treated the same
+        corpus = corpus.replace(/\s+/g, ' '); // clear excess white-space
+        console.log("Loaded corpus from "+path+"...");
+        return corpus;
+      }
 
 }

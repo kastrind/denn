@@ -4,7 +4,7 @@ import { DataSet } from './DataSet';
 
 export class Embeddings {
 
-  constructor(corpusPath, sentencesOutPath, dimensions) {
+  constructor(corpusPath, dimensions) {
     this.dimensions = dimensions;
     this.dictionary = {};
     this.dictionaryVectors = {};
@@ -12,15 +12,12 @@ export class Embeddings {
     this.trainSet = [];
 
     // load and cleanse corpus
-    let corpus = Embeddings.loadCorpus(corpusPath);
+    let corpus = DataSet.loadCorpus(corpusPath);
 
     // find sentences
     let sentences = [];
     sentences = corpus.split(/[.]/); // . marks sentences
     sentences = sentences.filter(sentence => sentence.length);
-
-    let corpusSentences = JSON.stringify({ sentences: sentences }, null, 2);
-    fs.writeFileSync(sentencesOutPath, corpusSentences);
 
     let adjacencyPairsForward = [];
 
@@ -68,8 +65,8 @@ export class Embeddings {
     this.adjacencyPairs.forEach(pair =>
     {
       let row = this.dictionaryVectors[pair.x].concat(this.dictionaryVectors[pair.y]);
-      if (Math.floor(this.maxFrequency / this.dictionary[pair.x]) > 1 &&
-          Math.floor(this.maxFrequency / this.dictionary[pair.y]) > 1
+      if (Math.round(this.maxFrequency / this.dictionary[pair.x]) > 1 &&
+          Math.round(this.maxFrequency / this.dictionary[pair.y]) > 1
       ) {
         this.trainSet.push(row);
       }
@@ -116,20 +113,6 @@ export class Embeddings {
       let embeddings_serialized = JSON.stringify(this, null, 2);
       fs.writeFileSync(path, embeddings_serialized);
       console.log("Serialized embeddings successfully.");
-  }
-
-  static loadCorpus(path) {
-    console.log("Loading corpus from "+path+"...");
-    let corpus = fs.readFileSync(path).toString();
-    // clean-up corpus
-    console.log("Cleansing corpus...");
-    corpus = corpus.replace(/[^A-Za-z\s.;:!?]/g, ""); // sanitize
-    corpus = corpus.replace(/[,]\s?/g, ' '); // ignore commas
-    corpus = corpus.replace(/[:]\s?/g, ' '); // part : part as one sentence
-    corpus = corpus.replace(/[.;!?]\s?/g, '.'); // . ; ! ? treated the same
-    corpus = corpus.replace(/\s+/g, ' '); // clear excess white-space
-    console.log("Loaded corpus from "+path+"...");
-    return corpus;
   }
 
 }

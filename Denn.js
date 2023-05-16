@@ -22,6 +22,7 @@ export class Denn {
         this.activationName = activation_function.name;
         this.outputEncoding = outputEncoding === 'ONEHOT' || outputEncoding === 'BINARY' ? outputEncoding : 'NONE';
         this.encoding_to_label_map = encoding_to_label_map;
+        this.binaryOneConfidenceThreshold = 0.1;
         this.initLayers();
     }
 
@@ -247,7 +248,7 @@ export class Denn {
             }
             if (i>0.5*epochs && (epoch_mean_error_prev - epoch_mean_error < 0.001*this.learning_rate/epochs ||
                 epoch_mean_error_prev - epoch_mean_error < 0)) {
-                early_stopping_cnt_low_error_drop++;
+                //early_stopping_cnt_low_error_drop++;
             }else {
                 early_stopping_cnt_low_error_drop = 0;
             }
@@ -293,7 +294,7 @@ export class Denn {
 
         }else if (this.outputEncoding === 'BINARY') {
             this.output.forEach(function (row, i, arr) {
-                output.push(that.encoding_to_label_map[row.toBinary(0.1).join('')]);
+                output.push(that.encoding_to_label_map[row.toBinary(that.binaryOneConfidenceThreshold).join('')]);
             });
 
         }else { // this.outputEncoding === 'NONE'
@@ -324,7 +325,7 @@ export class Denn {
                     hits++;
                 }
             }else if (that.outputEncoding === 'BINARY') {
-                if (row.toBinary(0.1).join('') === Y[i].join('')) {
+                if (row.toBinary(that.binaryOneConfidenceThreshold).join('') === Y[i].join('')) {
                     success=true;
                     hits++;
                 }
