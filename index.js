@@ -25,7 +25,7 @@ let Y = train_test.train.Y_one_hot;
 let formation = [{"neurons": 45, "dropout": 0.0}];
 let learning_rate = 1.5;
 
-// Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
+// Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), one-hot encoding for the output and its mapping to the labels
 var nn = new Denn(X, Y, formation, learning_rate, Activation.sigmoid, 'ONEHOT', onehot_to_labels);
 
 // Train DNN
@@ -40,25 +40,7 @@ nn.serialize(serialization_path);
 var nn2 = Denn.deserialize(serialization_path);
 
 // Resume training
-nn2.train(epochs*4, batch_size, error_threshold, verbose);
+nn2.train(epochs, batch_size, error_threshold, verbose);
 
 // Test model
 nn2.test(train_test.test.X, train_test.test.Y_one_hot, true);
-
-//console.log(train_test.test.Y_one_hot);
-
-/*
-Predictions below should be
-  'Iris-versicolor',
-  'Iris-setosa',
-  'Iris-virginica',
-  'Iris-virginica',
-  'Iris-setosa',
-console.log(nn2.predict([
-    [ 0.7468354430379747, 0.6818181818181818, 0.6086956521739131, 0.6 ],
-    [ 0.6075949367088607, 0.7727272727272726, 0.27536231884057966, 0.08 ],
-    [ 0.810126582278481, 0.6136363636363636, 0.7681159420289855, 0.76 ],
-    [ 0.7974683544303797, 0.7727272727272726, 0.8115942028985507, 0.96 ],
-    [ 0.6962025316455696, 0.9545454545454545, 0.20289855072463767, 0.08 ]
-], onehot_to_labels));
-*/

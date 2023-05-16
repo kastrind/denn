@@ -248,7 +248,7 @@ export class Denn {
             }
             if (i>0.5*epochs && (epoch_mean_error_prev - epoch_mean_error < 0.001*this.learning_rate/epochs ||
                 epoch_mean_error_prev - epoch_mean_error < 0)) {
-                //early_stopping_cnt_low_error_drop++;
+                early_stopping_cnt_low_error_drop++;
             }else {
                 early_stopping_cnt_low_error_drop = 0;
             }
