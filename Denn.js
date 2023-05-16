@@ -1,7 +1,7 @@
-import * as math from 'mathjs';
-import { Activation } from './Activation';
-import { Utils } from './Utils';
 import fs from 'fs';
+import * as math from 'mathjs';
+import { Utils } from './Utils';
+import { Activation } from './Activation';
 
 /**
  * Denn: Deep Neural Network

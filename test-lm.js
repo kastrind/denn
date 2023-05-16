@@ -1,7 +1,6 @@
-import * as math from 'mathjs';
+import { Utils } from './Utils';
 import { DataSet } from './DataSet';
 import { Denn } from './Denn';
-import { Utils } from './Utils';
 
 const projectName = 'Test3';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);

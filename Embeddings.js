@@ -1,6 +1,6 @@
-import { Denn } from './Denn';
 import fs from 'fs';
 import { DataSet } from './DataSet';
+import { Denn } from './Denn';
 
 export class Embeddings {
 

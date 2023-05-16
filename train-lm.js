@@ -1,7 +1,7 @@
-import { Denn } from './Denn';
-import { Activation } from './Activation';
-import { DataSet } from './DataSet';
 import fs from 'fs';
+import { DataSet } from './DataSet';
+import { Activation } from './Activation';
+import { Denn } from './Denn';
 
 const projectName = 'Test3';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
