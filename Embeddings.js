@@ -1,4 +1,6 @@
+import { match } from 'assert';
 import fs from 'fs';
+import * as math from 'mathjs';
 import { DataSet } from './DataSet';
 import { Denn } from './Denn';
 
@@ -46,8 +48,8 @@ export class Embeddings {
     Object.keys(this.dictionary).forEach((term, idx) =>
     {
       let bucket = idx%buckets + 1;
-      let termVector = Array.from({length: this.dimensions}, (x, i) => Math.random()*(bucket/(buckets*5)));
-      termVector[idx%this.dimensions] = bucket/buckets;
+      let termVector = Array.from({length: this.dimensions}, (x, i) => math.random(0.01, 0.99));
+      termVector[idx%this.dimensions] = math.random(0.01, 0.99);
       this.dictionaryVectors[term] = termVector;
     });
 

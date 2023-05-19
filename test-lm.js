@@ -2,7 +2,7 @@ import { Utils } from './Utils';
 import { DataSet } from './DataSet';
 import { Denn } from './Denn';
 
-const projectName = 'Test3';
+const projectName = 'Test5';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const label2Sentences = require(`./assets/${projectName}/label2Sentences.json`);
 
@@ -11,7 +11,7 @@ let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
 //let queries = ["mother pig", "house of straw", "huffed and puffed", "boil in the fireplace", "enter through the chimney"];
 //let queries = ["mother", "chimney", "boil"];
-let queries = ["green bikes", "green bicycles", "blue pigs", "green cows"];
+let queries = ["cancel card", "open account", "close account"];
 //let queries = ["owl", "dog", "cow"];
 //let queries = ["open account", "setup account", "cancel account"];
 queries.forEach(query => {
@@ -31,6 +31,6 @@ queries.forEach(query => {
     }
   });
   if (answers.length) {
-    console.log(`Answer: ${label2Sentences[DataSet.mode(answers)]}`);
+    console.log(`Answer: ${answers}`);
   }
 });

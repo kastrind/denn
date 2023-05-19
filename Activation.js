@@ -24,8 +24,8 @@ export class Activation {
         let return_z = [];
         if (derivative === true) {
             z.forEach(function (val, i) {
-                if (val > 0.01) {
-                    return_z[i] = math.random(0.9, 1);
+                if (val > 0.1) {
+                    return_z[i] = math.random(0.9, 0.99);
                 }else {
                     return_z[i] = math.random(0, 0.1);
                 }
@@ -41,6 +41,10 @@ export class Activation {
             }
         });
         return return_z;
+    }
+
+    static reluDeriv(z) {
+        return Activation.relu(z, true)
     }
 
 }

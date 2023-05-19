@@ -3,7 +3,7 @@ import { DataSet } from './DataSet';
 import { Activation } from './Activation';
 import { Denn } from './Denn';
 
-const projectName = 'Test3';
+const projectName = 'Test5';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const dimensions = embeddings.dimensions;
 
@@ -40,19 +40,21 @@ fs.writeFileSync(`./assets/${projectName}/label2Sentences.json`, JSON.stringify(
 
 // Populate binary to label map
 let binary_to_label_map = {};
-let datasetXY = DataSet.separateXY(trainSet, dimensions, 'BINARY', binary_to_label_map);
+let datasetXY = DataSet.separateXY(trainSet, dimensions, 'ONEHOT', binary_to_label_map);
+
+console.log(binary_to_label_map);
 
 // Shuffle the dataset
 trainSet = DataSet.shuffle(trainSet);
 
 let X = datasetXY.X;
-let Y = datasetXY.Y_bin;
+let Y = datasetXY.Y_one_hot;
 
-let formation = [{"neurons": 22, "dropout": 0.0}];
-let learning_rate = 1, epochs = 1000, batch_size = 20, error_threshold = 0.02, verbose = true;
+let formation = [{"neurons": 10, "dropout": 0.0}];
+let learning_rate = 1, epochs = 10000, batch_size = 20, error_threshold = 0.02, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), binary encoding for the output and its mapping to the labels
-let nn = new Denn(X, Y, formation, learning_rate, Activation.relu, 'BINARY', binary_to_label_map);
+let nn = new Denn(X, Y, formation, learning_rate, Activation.sigmoid, 'ONEHOT', binary_to_label_map);
 // Train DNN
 nn.train(epochs, batch_size, error_threshold, verbose);
 
