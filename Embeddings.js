@@ -31,15 +31,29 @@ export class Embeddings {
       for (let i=0; i<terms.length; i++) {
         let term = terms[i];
         this.dictionary[term] = this.dictionary[term] ? this.dictionary[term]+1 : 1;
-        for (let j=i; j<i+3; j++) {
-          if (j+1 < terms.length) {
-            adjacencyPairsForward.push({x: term, y: terms[j+1]});
-          }
-        }
       }
     });
 
     this.maxFrequency = Math.max(...Object.values(this.dictionary));
+
+    this.dictionary = Object.fromEntries(Object.entries(this.dictionary).filter(([term, freq]) => freq < this.maxFrequency/1));
+
+    sentences.forEach(sentence => 
+    {
+      sentence = sentence.toLowerCase();
+      let terms = sentence.split(" ");
+      for (let i=0; i<terms.length; i++) {
+        let term = terms[i];
+        if (!this.dictionary[term]) continue;
+        for (let j=i; j<i+5; j++) {
+          if (j+1 < terms.length) {
+            if (this.dictionary[terms[j+1]]) {
+              adjacencyPairsForward.push({x: term, y: terms[j+1]});
+            }
+          }
+        }
+      }
+    });
 
     let dictionarySize = Object.keys(this.dictionary).length;
     let buckets = Math.ceil(dictionarySize/this.dimensions);
@@ -48,8 +62,8 @@ export class Embeddings {
     Object.keys(this.dictionary).forEach((term, idx) =>
     {
       let bucket = idx%buckets + 1;
-      let termVector = Array.from({length: this.dimensions}, (x, i) => math.random(0.01, 0.99));
-      termVector[idx%this.dimensions] = math.random(0.01, 0.99);
+      let termVector = Array.from({length: this.dimensions}, (x, i) =>(bucket/buckets)*math.random(0.1, 0.2));
+      termVector[idx%this.dimensions] = (bucket/buckets)*0.99;
       this.dictionaryVectors[term] = termVector;
     });
 
@@ -67,11 +81,7 @@ export class Embeddings {
     this.adjacencyPairs.forEach(pair =>
     {
       let row = this.dictionaryVectors[pair.x].concat(this.dictionaryVectors[pair.y]);
-      if (Math.round(this.maxFrequency / this.dictionary[pair.x]) > 1 &&
-          Math.round(this.maxFrequency / this.dictionary[pair.y]) > 1
-      ) {
-        this.trainSet.push(row);
-      }
+      this.trainSet.push(row);
     });
 
   }

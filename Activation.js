@@ -24,10 +24,10 @@ export class Activation {
         let return_z = [];
         if (derivative === true) {
             z.forEach(function (val, i) {
-                if (val > 0.1) {
-                    return_z[i] = math.random(0.9, 0.99);
+                if (val > 0) {
+                    return_z[i] = math.random(0.9, 1);
                 }else {
-                    return_z[i] = math.random(0, 0.1);
+                    return_z[i] = math.random(0, 0.01);
                 }
             });
             return return_z;
@@ -37,7 +37,7 @@ export class Activation {
             if (val == -1) {
                 return_z[i] = z[i];
             }else {
-                return_z[i] = 0;
+                return_z[i] = z[i] * math.random(0, 0.01);
             }
         });
         return return_z;

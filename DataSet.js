@@ -212,7 +212,7 @@ export class DataSet {
                 tt.test.X.push(data.X[i]);
                 tt.test.Y.push(data.Y[i]);
                 if (data.Y_one_hot) { tt.test.Y_one_hot.push(data.Y_one_hot[i]); }
-                else if (data.Y_bin) { tt.test.bin.push(data.Y_bin[i]); }
+                else if (data.Y_bin) { tt.test.Y_bin.push(data.Y_bin[i]); }
             }else {
                 tt.train.X.push(data.X[i]);
                 tt.train.Y.push(data.Y[i]);

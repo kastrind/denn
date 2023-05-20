@@ -4,7 +4,6 @@ import { Denn } from './Denn';
 
 const projectName = 'Test5';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
-const label2Sentences = require(`./assets/${projectName}/label2Sentences.json`);
 
 // Load model from file
 let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);

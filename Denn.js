@@ -71,7 +71,7 @@ export class Denn {
         for (var i=0; i<this.layers.length; i++) {
             if(i==0) { this.layers[i].layer = math.multiply(this.input, this.layers[0].weights).map(v => this.activation(v, false)); }
             else if (i<this.layers.length-1) { this.layers[i].layer = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.activation(v, false)); }
-            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => Activation.sigmoid(v, false)); }
+            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.activation(v, false)); }
         }
     }
 
@@ -79,7 +79,7 @@ export class Denn {
         for (var i=this.layers.length-1; i>=0; i--) {
             if (i==this.layers.length-1) {
                 this.layers[i].error = math.subtract(this.Y, this.output);
-                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => Activation.sigmoid(v, true)));
+                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => this.activation(v, true)));
             }
             else if (i<this.layers.length-1 || i==0) {
                 this.layers[i].error = math.multiply(this.layers[i+1].delta, math.transpose(this.layers[i+1].weights));
@@ -88,9 +88,9 @@ export class Denn {
         }
         //update the weights
         for (var i=this.layers.length-1; i>=1; i--) {
-            this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), math.multiply(this.layers[i].delta, math.max(0.1, this.learning_rate*(1-epoch_idx/epochs)))));
+            this.layers[i].weights = math.add(this.layers[i].weights, math.multiply(math.transpose(this.layers[i-1].layer), math.multiply(this.layers[i].delta, math.max(0.01, this.learning_rate*(1-epoch_idx/epochs)))));
         }
-        this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), math.multiply(this.layers[0].delta, math.max(0.1, this.learning_rate*(1-epoch_idx/epochs)))));
+        this.layers[0].weights = math.add(this.layers[0].weights, math.multiply(math.transpose(this.input), math.multiply(this.layers[0].delta, math.max(0.01, this.learning_rate*(1-epoch_idx/epochs)))));
     }
 
     dropout() {
@@ -232,6 +232,7 @@ export class Denn {
                     start_i = stop_i;
                 }
             }
+            if (batch_cnt==0) continue;
             epoch_mean_error = math.divide(epoch_mean_error, batch_cnt);
             if (verbose) {
                 console.log("epoch: "+(i+1)+" / "+epochs+", mean error: "+epoch_mean_error);
