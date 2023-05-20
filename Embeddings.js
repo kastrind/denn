@@ -63,7 +63,7 @@ export class Embeddings {
     {
       let bucket = idx%buckets + 1;
       let termVector = Array.from({length: this.dimensions}, (x, i) =>(bucket/buckets)*math.random(0.1, 0.2));
-      termVector[idx%this.dimensions] = (bucket/buckets)*0.99;
+      termVector[idx%this.dimensions] = (bucket/buckets)*0.9;
       this.dictionaryVectors[term] = termVector;
     });
 

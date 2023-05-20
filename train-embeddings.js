@@ -2,7 +2,7 @@ import { Activation } from './Activation';
 import { Embeddings } from './Embeddings';
 
 const projectName = 'Test5';
-const dimensions = 20;
+const dimensions = 5;
 let embeddings = new Embeddings(`assets/${projectName}/corpus.txt`, dimensions);
 
 let formation = [{"neurons": 32, "dropout": 0.0}];
