@@ -71,7 +71,9 @@ export class Denn {
         for (var i=0; i<this.layers.length; i++) {
             if(i==0) { this.layers[i].layer = math.multiply(this.input, this.layers[0].weights).map(v => this.activation(v, false)); }
             else if (i<this.layers.length-1) { this.layers[i].layer = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.activation(v, false)); }
-            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => Activation.sigmoid(v, false)); }
+            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => Activation.softPlus(v, false)); 
+                //console.log("ff output:"+this.output[0]);
+            }
         }
     }
 
@@ -79,11 +81,13 @@ export class Denn {
         for (var i=this.layers.length-1; i>=0; i--) {
             if (i==this.layers.length-1) {
                 this.layers[i].error = math.subtract(this.Y, this.output);
+                //console.log("Layer err:"+this.layers[i].error[0]);
+                //console.log("Activation:"+Activation.sigmoid(this.output[0]));
                 this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => Activation.sigmoid(v, true)));
             }
             else if (i<this.layers.length-1 || i==0) {
                 this.layers[i].error = math.multiply(this.layers[i+1].delta, math.transpose(this.layers[i+1].weights));
-                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.layers[i].layer.map(v => this.activation(v, true))) ;
+                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.layers[i].layer.map(v => this.activation(v, true)));
             }
         }
         //update the weights
@@ -224,16 +228,18 @@ export class Denn {
                     if (i>0) this.dropoutRestore();
 
                     batch_squared_errors = math.subtract(this.Y, this.output);
+                    //console.log("BSE:"+batch_squared_errors);
                     batch_squared_errors.forEach(function(row, i, arr) { arr[i] = row.map(v => v*v); });
                     bse_size = math.size(batch_squared_errors);
+                    //console.log("BSE size:"+bse_size);
                     batch_mean_error = math.divide(math.sum(batch_squared_errors), bse_size[0]*bse_size[1]);
-                    //console.log(batch_squared_errors+ "     "+ bse_size[0]+"    "+bse_size[1]);
+                    //console.log("BMError: "+ batch_mean_error);
                     epoch_mean_error += batch_mean_error;
 
                     start_i = stop_i;
                 }
             }
-            //if (isNaN(epoch_mean_error)) { break; }
+            if (isNaN(epoch_mean_error)) { break; }
             epoch_mean_error = math.divide(epoch_mean_error, batch_cnt);
             if (verbose) {
                 console.log("epoch: "+(i+1)+" / "+epochs+", mean error: "+epoch_mean_error);
