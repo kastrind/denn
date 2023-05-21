@@ -8,7 +8,19 @@ import { Activation } from './Activation';
  */
 export class Denn {
 
-    constructor(X, Y, formation, learning_rate, activation_function=Activation.sigmoid, outputEncoding='NONE', encoding_to_label_map={}, initialized=false) {
+    /**
+     * 
+     * @param {Array} X The input features array.
+     * @param {Array} Y The output variables array.
+     * @param {Array} formation e.g. [{"neurons": 10, "dropout": 0.01}, {"neurons": 20, "dropout": 0.02}] describes two layers of 10 and 20 neurons respectively, and 1% and 2% dropout probability.
+     * @param {Number} learning_rate the learning rate.
+     * @param {Activation.functionName} activation_function the activation function for the hidden layers
+     * @param {Activation.functionName} output_activation_function the activation function for the output
+     * @param {String} output_encoding 'ONEHOT', 'BINARY' or 'NONE
+     * @param {Object} encoding_to_label_map mapping from encoding to categorical values (labels)
+     * @returns 
+     */
+    constructor(X, Y, formation, learning_rate, activation_function=Activation.sigmoid, output_activation_function=Activation.sigmoid, output_encoding='NONE', encoding_to_label_map={}, initialized=false) {
         if (!Denn.checkXY(X, Y)) { return null; }
         this.input = X;
         this.X = X;
@@ -20,10 +32,22 @@ export class Denn {
         this.learning_rate = learning_rate;
         this.activation = activation_function;
         this.activationName = activation_function.name;
-        this.outputEncoding = outputEncoding === 'ONEHOT' || outputEncoding === 'BINARY' ? outputEncoding : 'NONE';
+        this.outActivation = output_activation_function;
+        this.outActivationName = output_activation_function.name;
+        this.outputEncoding = output_encoding === 'ONEHOT' || output_encoding === 'BINARY' ? output_encoding : 'NONE';
         this.encoding_to_label_map = encoding_to_label_map;
         this.binaryOneConfidenceThreshold = 0.1;
         this.initLayers();
+    }
+
+    setHiddenActivation(activation_function) {
+        this.activation = activation_function;
+        this.activationName = activation_function.name;
+    }
+
+    setOutputActivation(activation_function) {
+        this.outActivation = activation_function;
+        this.outActivationName = activation_function.name;
     }
 
     /**
@@ -34,12 +58,13 @@ export class Denn {
         console.log("Deserializing model from "+path+"...");
         let nn_raw = fs.readFileSync(path);
         let nn_deserialized = JSON.parse(nn_raw);
-        let activations = {"sigmoid": Activation.sigmoid, "relu": Activation.relu};
+        let activations = {"sigmoid": Activation.sigmoid, "relu": Activation.relu, "softPlus": Activation.softPlus};
         var nn = new Denn(nn_deserialized.X,
                           nn_deserialized.Y,
                           nn_deserialized.formation,
                           nn_deserialized.learning_rate,
                           activations[nn_deserialized.activationName],
+                          activations[nn_deserialized.outActivationName],
                           nn_deserialized.outputEncoding,
                           nn_deserialized.encoding_to_label_map,
                           true);
@@ -71,9 +96,7 @@ export class Denn {
         for (var i=0; i<this.layers.length; i++) {
             if(i==0) { this.layers[i].layer = math.multiply(this.input, this.layers[0].weights).map(v => this.activation(v, false)); }
             else if (i<this.layers.length-1) { this.layers[i].layer = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.activation(v, false)); }
-            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => Activation.softPlus(v, false)); 
-                //console.log("ff output:"+this.output[0]);
-            }
+            if(i==this.layers.length-1) { this.output = math.multiply(this.layers[i-1].layer, this.layers[i].weights).map(v => this.outActivation(v, false)); }
         }
     }
 
@@ -81,9 +104,7 @@ export class Denn {
         for (var i=this.layers.length-1; i>=0; i--) {
             if (i==this.layers.length-1) {
                 this.layers[i].error = math.subtract(this.Y, this.output);
-                //console.log("Layer err:"+this.layers[i].error[0]);
-                //console.log("Activation:"+Activation.sigmoid(this.output[0]));
-                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => Activation.sigmoid(v, true)));
+                this.layers[i].delta = math.dotMultiply(this.layers[i].error, this.output.map(v => this.outActivation(v, true)));
             }
             else if (i<this.layers.length-1 || i==0) {
                 this.layers[i].error = math.multiply(this.layers[i+1].delta, math.transpose(this.layers[i+1].weights));
@@ -205,8 +226,6 @@ export class Denn {
         let epoch_mean_error = 0;
         let early_stopping_tolerance = Math.min(3, Math.floor(epochs/10));
         let early_stopping_cnt = 0;
-        let early_stopping_tolerance_low_error_drop = Math.min(5, Math.floor(epochs/10));
-        let early_stopping_cnt_low_error_drop = 0;
         let epoch_mean_error_prev = 1;
 
         for (var i=0; i<epochs; i++) {
@@ -228,18 +247,14 @@ export class Denn {
                     if (i>0) this.dropoutRestore();
 
                     batch_squared_errors = math.subtract(this.Y, this.output);
-                    //console.log("BSE:"+batch_squared_errors);
                     batch_squared_errors.forEach(function(row, i, arr) { arr[i] = row.map(v => v*v); });
                     bse_size = math.size(batch_squared_errors);
-                    //console.log("BSE size:"+bse_size);
                     batch_mean_error = math.divide(math.sum(batch_squared_errors), bse_size[0]*bse_size[1]);
-                    //console.log("BMError: "+ batch_mean_error);
                     epoch_mean_error += batch_mean_error;
 
                     start_i = stop_i;
                 }
             }
-            if (isNaN(epoch_mean_error)) { break; }
             epoch_mean_error = math.divide(epoch_mean_error, batch_cnt);
             if (verbose) {
                 console.log("epoch: "+(i+1)+" / "+epochs+", mean error: "+epoch_mean_error);
@@ -251,16 +266,6 @@ export class Denn {
                 early_stopping_cnt = 0;
             }
             if (early_stopping_cnt == early_stopping_tolerance) {
-                if (verbose) console.log("Early stopping to avoid over-fitting.");
-                break;
-            }
-            if (i>0.5*epochs && (epoch_mean_error_prev - epoch_mean_error < 0.001*this.learning_rate/epochs ||
-                epoch_mean_error_prev - epoch_mean_error < 0)) {
-                //early_stopping_cnt_low_error_drop++;
-            }else {
-                early_stopping_cnt_low_error_drop = 0;
-            }
-            if (early_stopping_cnt_low_error_drop == early_stopping_tolerance_low_error_drop) {
                 if (verbose) console.log("Early stopping to avoid over-fitting.");
                 break;
             }
@@ -315,7 +320,7 @@ export class Denn {
      * Tests model with a test set.
      * @param {Array} X The input features array.
      * @param {Array} Y The output variables array.
-     * @param {Boolean} Y Verbosity.
+     * @param {Boolean} verbose Verbosity.
      */
     test(X, Y, verbose) {
         if (!Denn.checkXY(X, Y)) { return null; }
@@ -361,7 +366,7 @@ export class Denn {
         for (let i=0; i<arr.length; i++) {
             if (arr[i]>max) {
                 max_i = i;
-                max = arr[i]
+                max = arr[i];
             }
         }
         return max_i;
@@ -370,7 +375,7 @@ export class Denn {
     /**
      * Serializes the model to a file in the given path.
      * @param {String} path  The path.
-     * @param {Boolean} finalize  If true, no further training can be resumed because input, output, X and Y are emptied
+     * @param {Boolean} finalize  If true, no further training can be resumed because input, output, X and Y are emptied.
      */
     serialize(path, finalize=false) {
         console.log("Serializing model to "+path+"...");

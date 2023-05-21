@@ -42,19 +42,17 @@ fs.writeFileSync(`./assets/${projectName}/label2Sentences.json`, JSON.stringify(
 let binary_to_label_map = {};
 let datasetXY = DataSet.separateXY(trainSet, dimensions, 'ONEHOT', binary_to_label_map);
 
-console.log(binary_to_label_map);
-
 // Shuffle the dataset
 trainSet = DataSet.shuffle(trainSet);
 
 let X = datasetXY.X;
 let Y = datasetXY.Y_one_hot;
 
-let formation = [{"neurons": 6, "dropout": 0.0},{"neurons": 6, "dropout": 0.0},{"neurons": 6, "dropout": 0.0}];
-let learning_rate = 5000000, epochs = 10000, batch_size = 5, error_threshold = 0.02, verbose = true;
+let formation = [{"neurons": 16, "dropout": 0.0}, {"neurons": 32, "dropout": 0.0}];
+let learning_rate = 0.15, epochs = 100000, batch_size = 10, error_threshold = 0.02, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), binary encoding for the output and its mapping to the labels
-let nn = new Denn(X, Y, formation, learning_rate, Activation.relu, 'ONEHOT', binary_to_label_map);
+let nn = new Denn(X, Y, formation, learning_rate, Activation.relu, Activation.softPlus, 'ONEHOT', binary_to_label_map);
 // Train DNN
 nn.train(epochs, batch_size, error_threshold, verbose);
 

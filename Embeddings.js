@@ -86,7 +86,7 @@ export class Embeddings {
 
   }
 
-  train(formation, learning_rate, activation_function, epochs, batch_size, error_threshold, verbose = false) {
+  train(formation, learning_rate, activation_function, output_activation_function, epochs, batch_size, error_threshold, verbose = false) {
     let datasetXY = { X:[], Y:[] };
 
     this.trainSet.forEach(row => {
@@ -98,7 +98,7 @@ export class Embeddings {
     let Y = datasetXY.Y;
 
     // Instantiate DNN with a training set, architecture, learning rate and activation function of its hidden layer(s)
-    var nn = new Denn(X, Y, formation, learning_rate, activation_function);
+    var nn = new Denn(X, Y, formation, learning_rate, activation_function, output_activation_function);
 
     // Train DNN
     nn.train(epochs, batch_size, error_threshold, verbose);

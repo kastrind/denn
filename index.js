@@ -22,14 +22,14 @@ let X = train_test.train.X;
 let Y = train_test.train.Y_bin;
 
 // This DNN will comprise one hidden layer of 5 neurons without drop-out probability
-let formation = [{"neurons": 8, "dropout": 0.0}, {"neurons": 16, "dropout": 0.0}];
-let learning_rate = 0.15;
+let formation = [{"neurons": 20, "dropout": 0.0}];
+let learning_rate = 0.01;
 
 // Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), one-hot encoding for the output and its mapping to the labels
-var nn = new Denn(X, Y, formation, learning_rate, Activation.relu, 'BINARY', onehot_to_labels);
+var nn = new Denn(X, Y, formation, learning_rate, Activation.relu, Activation.softPlus, 'BINARY', onehot_to_labels);
 
 // Train DNN
-let epochs = 10000, batch_size = 10, error_threshold = 0.01, verbose = true;
+let epochs = 1000, batch_size = 10, error_threshold = 0.01, verbose = true;
 nn.train(epochs, batch_size, error_threshold, verbose);
 
 // Save model to a file
