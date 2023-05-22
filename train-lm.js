@@ -6,14 +6,29 @@ import { Denn } from './Denn';
 const projectName = 'Test5';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const dimensions = embeddings.dimensions;
+const labelSeparator = '';
 
 // Load and cleanse corpus
-let corpus = DataSet.loadCorpus(`./assets/${projectName}/corpus.txt`);
+let corpusInitial = DataSet.loadCorpus(`./assets/${projectName}/corpus.txt`);
+let corpus;
+if (labelSeparator) {
+  corpus = corpusInitial.replace(new RegExp(labelSeparator+"[^"+labelSeparator+"]+\r?\n", 'g'), '.\n');
+  corpus = DataSet.cleanCorpus(corpus);
+}else {
+  corpus = DataSet.cleanCorpus(corpusInitial);
+}
 
 // Find sentences
 let sentences = [];
 sentences = corpus.split(/[.]/); // . marks sentences
 sentences = sentences.filter(sentence => sentence.length);
+
+let labels;
+if (labelSeparator) {
+  labels = corpusInitial.match(new RegExp(labelSeparator+"[^"+labelSeparator+"]+\r?\n", 'g'));
+  labels.forEach((label, idx, arr) => { arr[idx] = label.replace(/[;\s.]/g, ''); });
+  console.log(labels);
+}
 
 // Save sentences
 let corpusSentences = JSON.stringify({ sentences: sentences }, null, 2);
@@ -26,7 +41,7 @@ let label2Sentences = {};
 sentences.forEach((sentence, sIdx) => {
   sentence = sentence.toLowerCase();
   let terms = sentence.split(' ');
-  let sentenceLabel = "s"+sIdx;
+  let sentenceLabel = labels ? labels[sIdx] : 's'+sIdx;
   label2Sentences[sentenceLabel] = sentence;
   for (let i=0; i<terms.length; i++) {
     if (Math.round(embeddings.maxFrequency / embeddings.dictionary[terms[i]]) > 1) {
@@ -48,8 +63,8 @@ trainSet = DataSet.shuffle(trainSet);
 let X = datasetXY.X;
 let Y = datasetXY.Y_one_hot;
 
-let formation = [{"neurons": 16, "dropout": 0.0}, {"neurons": 32, "dropout": 0.0}];
-let learning_rate = 0.15, epochs = 100000, batch_size = 10, error_threshold = 0.02, verbose = true;
+let formation = [{"neurons": 48, "dropout": 0.0}];
+let learning_rate = 0.1, epochs = 1000, batch_size = 10, error_threshold = 0.02, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), binary encoding for the output and its mapping to the labels
 let nn = new Denn(X, Y, formation, learning_rate, Activation.relu, Activation.softPlus, 'ONEHOT', binary_to_label_map);

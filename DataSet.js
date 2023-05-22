@@ -226,19 +226,27 @@ export class DataSet {
     /**
      * Loads text from a path and filename and cleanses it.
      * @param {String} path path and filaname of the corpus to load
-     * @returns {String} the cleansed corpus
      */
     static loadCorpus(path) {
         console.log("Loading corpus from "+path+"...");
         let corpus = fs.readFileSync(path).toString();
+        console.log("Loaded corpus from "+path+".");
+        return corpus;
+      }
+
+      /**
+       * Cleanses corpus to preserve only the latin alphabet and the period.
+       * @param {String} corpus 
+       * @returns {String} cleansed corpus
+       */
+      static cleanCorpus(corpus) {
         // clean-up corpus
         console.log("Cleansing corpus...");
         corpus = corpus.replace(/[^A-Za-z\s.;:!?]/g, ""); // sanitize
         corpus = corpus.replace(/[,]\s?/g, ' '); // ignore commas
         corpus = corpus.replace(/[:]\s?/g, ' '); // part : part as one sentence
-        corpus = corpus.replace(/[.;!?]\s?/g, '.'); // . ; ! ? treated the same
+        corpus = corpus.replace(/[.;!?]\s?/g, '.'); // treat . ; ! ? as .
         corpus = corpus.replace(/\s+/g, ' '); // clear excess white-space
-        console.log("Loaded corpus from "+path+"...");
         return corpus;
       }
 

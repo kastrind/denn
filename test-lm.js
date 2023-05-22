@@ -10,7 +10,7 @@ let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
 //let queries = ["mother pig", "house of straw", "huffed and puffed", "boil in the fireplace", "enter through the chimney"];
 //let queries = ["mother", "chimney", "boil"];
-let queries = ["cancel card", "open account", "close account"];
+let queries = ["i want to cancel lost card", "open a new account", "i want to close my account", "how is the delivery of my card", "cancel my deposit"];
 //let queries = ["owl", "dog", "cow"];
 //let queries = ["open account", "setup account", "cancel account"];
 queries.forEach(query => {

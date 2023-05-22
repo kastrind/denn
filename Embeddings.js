@@ -15,6 +15,7 @@ export class Embeddings {
 
     // load and cleanse corpus
     let corpus = DataSet.loadCorpus(corpusPath);
+    corpus = DataSet.cleanCorpus(corpus);
 
     // find sentences
     let sentences = [];
