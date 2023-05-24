@@ -224,7 +224,7 @@ export class Denn {
         let X = this.input;
         let y = this.Y;
         let epoch_mean_error = 0;
-        let early_stopping_tolerance = Math.min(3, Math.floor(epochs/10));
+        let early_stopping_tolerance = Math.max(3, Math.floor(epochs/10));;
         let early_stopping_cnt = 0;
         let epoch_mean_error_prev = 1;
 
@@ -303,6 +303,7 @@ export class Denn {
                 max_i = that.maxIndex(row);
                 onehot_array[max_i] = 1;
                 output.push(that.encoding_to_label_map[onehot_array.join('')]);
+                console.log(that.encoding_to_label_map);
             });
 
         }else if (this.outputEncoding === 'BINARY') {

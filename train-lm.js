@@ -6,7 +6,7 @@ import { Denn } from './Denn';
 const projectName = 'Test5';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const dimensions = embeddings.dimensions;
-const labelSeparator = '';
+const labelSeparator = ';';
 
 // Load and cleanse corpus
 let corpusInitial = DataSet.loadCorpus(`./assets/${projectName}/corpus.txt`);
@@ -27,7 +27,7 @@ let labels;
 if (labelSeparator) {
   labels = corpusInitial.match(new RegExp(labelSeparator+"[^"+labelSeparator+"]+\r?\n", 'g'));
   labels.forEach((label, idx, arr) => { arr[idx] = label.replace(/[;\s.]/g, ''); });
-  console.log(labels);
+  //console.log(labels);
 }
 
 // Save sentences
@@ -63,11 +63,11 @@ trainSet = DataSet.shuffle(trainSet);
 let X = datasetXY.X;
 let Y = datasetXY.Y_one_hot;
 
-let formation = [{"neurons": 48, "dropout": 0.0}];
-let learning_rate = 0.1, epochs = 1000, batch_size = 10, error_threshold = 0.02, verbose = true;
+let formation = [{"neurons": 16, "dropout": 0.0}];
+let learning_rate = 0.5, epochs = 100, batch_size = 10, error_threshold = 0.02, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), binary encoding for the output and its mapping to the labels
-let nn = new Denn(X, Y, formation, learning_rate, Activation.relu, Activation.softPlus, 'ONEHOT', binary_to_label_map);
+let nn = new Denn(X, Y, formation, learning_rate, Activation.sigmoid, Activation.sigmoid, 'ONEHOT', binary_to_label_map);
 // Train DNN
 nn.train(epochs, batch_size, error_threshold, verbose);
 
@@ -75,4 +75,4 @@ nn.train(epochs, batch_size, error_threshold, verbose);
 nn.serialize(`./assets/${projectName}/lm.json`, true);
 
 // Test model
-nn.test(X, Y, true);
+//nn.test(X, Y, true);
