@@ -14,10 +14,10 @@ export class Denn {
      * @param {Array} Y The output variables array.
      * @param {Array} formation e.g. [{"neurons": 10, "dropout": 0.01}, {"neurons": 20, "dropout": 0.02}] describes two layers of 10 and 20 neurons respectively, and 1% and 2% dropout probability.
      * @param {Number} learning_rate the learning rate.
-     * @param {Activation.functionName} activation_function the activation function for the hidden layers
-     * @param {Activation.functionName} output_activation_function the activation function for the output
-     * @param {String} output_encoding 'ONEHOT', 'BINARY' or 'NONE
-     * @param {Object} encoding_to_label_map mapping from encoding to categorical values (labels)
+     * @param {Activation.functionName} activation_function the activation function for the hidden layers (default: Activation.sigmoid)
+     * @param {Activation.functionName} output_activation_function the activation function for the output (default: Activation.sigmoid)
+     * @param {String} output_encoding 'ONEHOT', 'BINARY' or 'NONE (default: 'NONE')
+     * @param {Object} encoding_to_label_map mapping from encoding to categorical values (labels)  (default: {})
      * @returns 
      */
     constructor(X, Y, formation, learning_rate, activation_function=Activation.sigmoid, output_activation_function=Activation.sigmoid, output_encoding='NONE', encoding_to_label_map={}, initialized=false) {
@@ -224,7 +224,7 @@ export class Denn {
         let X = this.input;
         let y = this.Y;
         let epoch_mean_error = 0;
-        let early_stopping_tolerance = Math.max(3, Math.floor(epochs/10));;
+        let early_stopping_tolerance = Math.max(3, Math.floor(epochs/10));
         let early_stopping_cnt = 0;
         let epoch_mean_error_prev = 1;
 
@@ -303,7 +303,6 @@ export class Denn {
                 max_i = that.maxIndex(row);
                 onehot_array[max_i] = 1;
                 output.push(that.encoding_to_label_map[onehot_array.join('')]);
-                console.log(that.encoding_to_label_map);
             });
 
         }else if (this.outputEncoding === 'BINARY') {

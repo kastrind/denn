@@ -3,7 +3,7 @@ import { Utils } from './Utils';
 import { DataSet } from './DataSet';
 import { Denn } from './Denn';
 
-const projectName = 'Test5';
+const projectName = 'Test';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 
 // Load model from file
@@ -11,7 +11,7 @@ let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
 //let queries = ["mother pig", "house of straw", "huffed and puffed", "boil in the fireplace", "enter through the chimney"];
 //let queries = ["mother", "chimney", "boil"];
-let queries = ["i want to cancel lost card", "open a new account", "i want to close my account", "how is the delivery of my card", "cancel my deposit"];
+let queries = ["cancel card", "open a new account", "close my account", "card delivery", "what is my credit score"];
 //let queries = ["owl", "dog", "cow"];
 //let queries = ["open account", "setup account", "cancel account"];
 queries.forEach(query => {
@@ -23,18 +23,24 @@ queries.forEach(query => {
   let answers = [];
   let prevQueryTerms = [];
   let outputSum = math.zeros(Object.keys(nn.encoding_to_label_map).length)._data;
+  let onehot_array = math.zeros(outputSum.length)._data;
+  let max_i;
   queryTerms.forEach(term => {
     if (!prevQueryTerms.includes(term) && embeddings.dictionaryEmbeddings[term]) {
       queryTermEmbedding = embeddings.dictionaryEmbeddings[term];
       answer = nn.predict([queryTermEmbedding]);
-      console.log(nn.output[0]);
+      console.log(term);
+      //console.log(nn.output[0]);
       outputSum = math.add(outputSum, nn.output[0]);
-      answers.push(answer);
+      //answers.push(answer);
       prevQueryTerms.push(term);
     }
   });
+  console.log(nn.encoding_to_label_map);
   console.log(outputSum);
-  //qTESum = math.dotDivide(qTESum, prevQueryTerms.length);
+  max_i = nn.maxIndex(outputSum);
+  onehot_array[max_i] = 1;
+  console.log(nn.encoding_to_label_map[onehot_array.join('')]);
   if (answers.length) {
     console.log(`Answer: ${answers}`);
   }

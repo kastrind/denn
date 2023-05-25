@@ -63,8 +63,8 @@ export class Embeddings {
     Object.keys(this.dictionary).forEach((term, idx) =>
     {
       let bucket = idx%buckets + 1;
-      let termVector = Array.from({length: this.dimensions}, (x, i) =>(bucket/buckets)*math.random(0.1, 0.2));
-      termVector[idx%this.dimensions] = (bucket/buckets)*0.9;
+      let termVector = Array.from({length: this.dimensions}, (x, i) =>(bucket/buckets)*math.random(0.01, 0.02));
+      termVector[idx%this.dimensions] = (bucket/buckets)*0.99;
       this.dictionaryVectors[term] = termVector;
     });
 

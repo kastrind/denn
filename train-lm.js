@@ -3,7 +3,7 @@ import { DataSet } from './DataSet';
 import { Activation } from './Activation';
 import { Denn } from './Denn';
 
-const projectName = 'Test5';
+const projectName = 'Test';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const dimensions = embeddings.dimensions;
 const labelSeparator = ';';
@@ -63,11 +63,11 @@ trainSet = DataSet.shuffle(trainSet);
 let X = datasetXY.X;
 let Y = datasetXY.Y_one_hot;
 
-let formation = [{"neurons": 16, "dropout": 0.0}];
-let learning_rate = 0.5, epochs = 100, batch_size = 10, error_threshold = 0.02, verbose = true;
+let formation = [{"neurons": 92, "dropout": 0.0}];
+let learning_rate = 0.01, epochs = 10000, batch_size = 500, error_threshold = 0.02, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), binary encoding for the output and its mapping to the labels
-let nn = new Denn(X, Y, formation, learning_rate, Activation.sigmoid, Activation.sigmoid, 'ONEHOT', binary_to_label_map);
+let nn = new Denn(X, Y, formation, learning_rate, Activation.sigmoid, Activation.softPlus, 'ONEHOT', binary_to_label_map);
 // Train DNN
 nn.train(epochs, batch_size, error_threshold, verbose);
 
