@@ -269,10 +269,12 @@ export class Denn {
                         augmentCounter=0;
                     }else {
                         //console.log("restoring layers");
-                        this.layers = JSON.parse(JSON.stringify(this.layers_backup));
-                        let res = this.ruleOutAndShuffleXY(start_i, stop_i, X, y);
-                        X = res.X;
-                        y = res.y;
+                        //this.layers = JSON.parse(JSON.stringify(this.layers_backup));
+                        //let res = this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error_prev);
+                        //X = res.X;
+                        //y = res.y;
+                        batch_mean_error = this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error);
+                        if(X.length<=100) break;
                     }
                     batch_mean_error_prev = batch_mean_error;
                     epoch_mean_error += batch_mean_error;
@@ -303,14 +305,53 @@ export class Denn {
         console.log("TRAINING - end\n");
     }
 
-    ruleOutAndShuffleXY(from, to, X, y) {
+    backtrack(from, to, X, y, i, epochs, batch_mean_error_prev) {
+        //console.log("backtracking");
+        this.layers = JSON.parse(JSON.stringify(this.layers_backup));
+
+        let batch_squared_errors = [], bse_size = [], batch_mean_error = 0;
+
+        for (let cnt=0; cnt<(to-from); cnt++) {
+            this.input = X.slice(from, from+1);
+            this.Y = y.slice(from, from+1);
+
+            this.layers_backup = JSON.parse(JSON.stringify(this.layers));
+
+            if (i>0) this.dropout();
+            this.feedforward();
+            this.backprop(i, epochs);
+            if (i>0) this.dropoutRestore();
+
+            batch_squared_errors = math.subtract(this.Y, this.output);
+            batch_squared_errors.forEach(function(row, i, arr) { arr[i] = row.map(v => v*v); });
+            bse_size = math.size(batch_squared_errors);
+            batch_mean_error = math.divide(math.sum(batch_squared_errors), bse_size[0]*bse_size[1]);
+
+            if (batch_mean_error > batch_mean_error_prev) {
+                //console.log("worse!");
+                this.layers = JSON.parse(JSON.stringify(this.layers_backup));
+                if (math.random(0, 1) > 0.9) {
+                    if (X.length > 100) {
+                        X.splice(from, 1);
+                        y.splice(from, 1);
+                    }
+                    console.log("new size: " + X.length);
+                }
+            }else {
+              //console.log("better!");
+              batch_mean_error_prev = batch_mean_error;
+            }
+            from++;
+        }
+        return batch_mean_error;
+        /*
         let trainSet = [];
         if (X.length > 100) {
             X.splice(from, 1);
             y.splice(from, 1);
             X = X.concat(X.splice(from, to - from-1));
             y = y.concat(y.splice(from, to - from-1));
-        }
+        }*/
         /*
         //console.log("X: "+X.length);
         for (let x=0; x<X.length; x++) {

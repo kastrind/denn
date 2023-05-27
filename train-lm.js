@@ -63,8 +63,8 @@ let datasetXY = DataSet.separateXY(trainSet, dimensions, 'ONEHOT', binary_to_lab
 let X = datasetXY.X;
 let Y = datasetXY.Y_one_hot;
 
-let formation = [{"neurons": 92, "dropout": 0.0}];
-let learning_rate = 0.1, epochs = 1000, batch_size = 30, error_threshold = 0.02, verbose = true;
+let formation = [{"neurons": 64, "dropout": 0.0}];
+let learning_rate = 0.1, epochs = 300, batch_size = 50, error_threshold = 0.02, verbose = true;
 
 // Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), binary encoding for the output and its mapping to the labels
 let nn = new Denn(X, Y, formation, learning_rate, Activation.relu, Activation.softPlus, 'ONEHOT', binary_to_label_map);
