@@ -46,10 +46,14 @@ export class Embeddings {
       for (let i=0; i<terms.length; i++) {
         let term = terms[i];
         if (!this.dictionary[term]) continue;
-        for (let j=i; j<i+5; j++) {
+        for (let j=i; j<i+3; j++) {
           if (j+1 < terms.length) {
             if (this.dictionary[terms[j+1]]) {
-              adjacencyPairsForward.push({x: term, y: terms[j+1]});
+              let freqRatioX = this.dictionary[term] / this.maxFrequency;
+              let freqRatioY = this.dictionary[terms[j+1]] / this.maxFrequency;
+              if (freqRatioX < 0.5 && freqRatioY < 0.5) {
+                adjacencyPairsForward.push({x: term, y: terms[j+1]});
+              }
             }
           }
         }
@@ -62,9 +66,10 @@ export class Embeddings {
     // generate initial vectors for each dictionary term
     Object.keys(this.dictionary).forEach((term, idx) =>
     {
+      let freq = this.dictionary[term];
       let bucket = idx%buckets + 1;
-      let termVector = Array.from({length: this.dimensions}, (x, i) =>(bucket/buckets)*math.random(0.01, 0.02));
-      termVector[idx%this.dimensions] = (bucket/buckets)*0.99;
+      let termVector = Array.from({length: this.dimensions}, (x, i) =>(bucket/buckets)*math.random(0.01, 0.09));
+      termVector[idx%this.dimensions] = (bucket/buckets)*math.random(0.9, 1.0);
       this.dictionaryVectors[term] = termVector;
     });
 

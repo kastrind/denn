@@ -3,7 +3,7 @@ import { Utils } from './Utils';
 import { DataSet } from './DataSet';
 import { Denn } from './Denn';
 
-const projectName = 'Test';
+const projectName = 'Test5';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 
 // Load model from file
@@ -29,15 +29,15 @@ queries.forEach(query => {
     if (!prevQueryTerms.includes(term) && embeddings.dictionaryEmbeddings[term]) {
       queryTermEmbedding = embeddings.dictionaryEmbeddings[term];
       answer = nn.predict([queryTermEmbedding]);
-      console.log(term);
+      //console.log(term);
       //console.log(nn.output[0]);
       outputSum = math.add(outputSum, nn.output[0]);
       //answers.push(answer);
       prevQueryTerms.push(term);
     }
   });
-  console.log(nn.encoding_to_label_map);
-  console.log(outputSum);
+  //console.log(nn.encoding_to_label_map);
+  //console.log(outputSum);
   max_i = nn.maxIndex(outputSum);
   onehot_array[max_i] = 1;
   console.log(nn.encoding_to_label_map[onehot_array.join('')]);
