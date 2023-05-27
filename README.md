@@ -44,8 +44,8 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
     var nn = new Denn(X, Y, formation, learning_rate, Activation.relu, 'ONEHOT', onehot_to_labels);
 
     // Train DNN
-    let epochs = 100, batch_size = 1, error_threshold = 0.02, verbose = true;
-    nn.train(epochs, batch_size, error_threshold, false, verbose);
+    let epochs = 100, batch_size = 1, error_threshold = 0.02, backtrack = false, verbose = true;
+    nn.train(epochs, batch_size, error_threshold, backtrack, verbose);
 
     // Save model to a file
     let serialization_path = './nn-model.json';

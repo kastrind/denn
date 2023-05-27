@@ -220,13 +220,16 @@ export class Denn {
      * @param {Float} error_threshold Error threshold below which early stopping triggers.
      * @param {Boolean} backtrack Whether to backtrack in case mean squared error is greater than previous for batch
      * @param {Boolean} verbose Verbosity (default: true)
+     * @param {Integer} error_drop_iterations How many times to train a batch that lowered error (default: 3)
      */
-    train(epochs, batch_size, error_threshold, backtrack=false, verbose=true) {
+    train(epochs, batch_size, error_threshold, backtrack=false, verbose=true, error_drop_iterations=3) {
         console.log("\nTRAINING - start");
+        this.maxErrorDiff = 0;
         let X = this.input;
+        let training_size = X.length;
         let y = this.Y;
         let epoch_mean_error = 0;
-        let early_stopping_tolerance = Math.max(3, Math.floor(epochs/10));
+        let early_stopping_tolerance = Math.max(3, Math.floor(epochs/100));
         let early_stopping_cnt = 0;
         let epoch_mean_error_prev = 1;
 
@@ -253,17 +256,15 @@ export class Denn {
 
                     batch_mean_error = this.getMeanSquaredError();
 
-                    if(batch_mean_error < batch_mean_error_prev) {
-                        for (let augmentCounter = 0; augmentCounter < 3; augmentCounter++) {
-                            //console.log("augmentCounter:"+augmentCounter);
+                    if(error_drop_iterations > 0 && batch_mean_error < batch_mean_error_prev) {
+                        for (let augmentCounter = 0; augmentCounter < error_drop_iterations; augmentCounter++) {
                             if (i>0) this.dropout();
                             this.feedforward();
                             this.backprop(i, epochs);
                             if (i>0) this.dropoutRestore();
                         }
-                    }else if (backtrack && i>1) {
-                        batch_mean_error = this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error);
-                        if(X.length<=100) break;
+                    }else if (backtrack && i>1 && X.length > training_size/4) {
+                        this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error);
                     }
                     batch_mean_error_prev = batch_mean_error;
                     epoch_mean_error += batch_mean_error;
@@ -298,7 +299,7 @@ export class Denn {
         //console.log("backtracking");
         this.layers = JSON.parse(JSON.stringify(this.layers_backup));
 
-        let batch_mean_error = 0;
+        let batch_mean_error = 0, error_diff = 0;
 
         for (let cnt=0; cnt<(to-from); cnt++) {
             this.input = X.slice(from, from+1);
@@ -312,26 +313,27 @@ export class Denn {
             if (i>0) this.dropoutRestore();
 
             batch_mean_error = this.getMeanSquaredError();
+            error_diff = batch_mean_error - batch_mean_error_prev;
 
-            if (batch_mean_error > batch_mean_error_prev) {
+            if (error_diff > 0) {
+                this.maxErrorDiff = error_diff > this.maxErrorDiff ? error_diff : this.maxErrorDiff;
                 //console.log("worse!");
                 this.layers = JSON.parse(JSON.stringify(this.layers_backup));
                 if (math.random(0, 1) > 0.99) {
-                    if (X.length > 100) {
-                        X.splice(from, 1);
-                        y.splice(from, 1);
-                    }
-                    console.log("new size: " + X.length);
+                    X.splice(from, 1);
+                    y.splice(from, 1);
                 }
             }else {
-              //console.log("better!");
               batch_mean_error_prev = batch_mean_error;
             }
             from++;
         }
-        return batch_mean_error;
     }
 
+    /**
+     * 
+     * @returns {Float} the mean squared error between the output and Y.
+     */
     getMeanSquaredError() {
         let batch_squared_errors = [], bse_size = [], batch_mean_error = 0;
         batch_squared_errors = math.subtract(this.Y, this.output);
