@@ -1,7 +1,7 @@
 import { Activation } from './Activation';
 import { Embeddings } from './Embeddings';
 
-const projectName = 'Test5';
+const projectName = 'Test';
 const dimensions = 40;
 let embeddings = new Embeddings(`assets/${projectName}/embeddingsCorpus.txt`, dimensions);
 

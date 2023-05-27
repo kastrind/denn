@@ -3,7 +3,7 @@ import { DataSet } from './DataSet';
 import { Activation } from './Activation';
 import { Denn } from './Denn';
 
-const projectName = 'Test5';
+const projectName = 'Test';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 const dimensions = embeddings.dimensions;
 const labelSeparator = ';';
@@ -69,7 +69,7 @@ let learning_rate = 0.1, epochs = 300, batch_size = 50, error_threshold = 0.02, 
 // Instantiate DNN with a training set, architecture, learning rate, activation function of its hidden layer(s), binary encoding for the output and its mapping to the labels
 let nn = new Denn(X, Y, formation, learning_rate, Activation.relu, Activation.softPlus, 'ONEHOT', binary_to_label_map);
 // Train DNN
-nn.train(epochs, batch_size, error_threshold, verbose);
+nn.train(epochs, batch_size, error_threshold, true, verbose);
 
 // Save model to file, finalize it
 nn.serialize(`./assets/${projectName}/lm.json`, true);

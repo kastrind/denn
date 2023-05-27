@@ -51,7 +51,7 @@ export class Embeddings {
             if (this.dictionary[terms[j+1]]) {
               let freqRatioX = this.dictionary[term] / this.maxFrequency;
               let freqRatioY = this.dictionary[terms[j+1]] / this.maxFrequency;
-              if (freqRatioX < 0.5 && freqRatioY < 0.5) {
+              if (freqRatioX < 0.75 && freqRatioY < 0.75) {
                 adjacencyPairsForward.push({x: term, y: terms[j+1]});
               }
             }
@@ -107,7 +107,7 @@ export class Embeddings {
     var nn = new Denn(X, Y, formation, learning_rate, activation_function, output_activation_function);
 
     // Train DNN
-    nn.train(epochs, batch_size, error_threshold, verbose);
+    nn.train(epochs, batch_size, error_threshold, false, verbose);
 
     this.dictionaryEmbeddings = {};
 

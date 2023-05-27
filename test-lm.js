@@ -3,7 +3,7 @@ import { Utils } from './Utils';
 import { DataSet } from './DataSet';
 import { Denn } from './Denn';
 
-const projectName = 'Test5';
+const projectName = 'Test';
 const embeddings = require(`./assets/${projectName}/embeddings.json`);
 
 // Load model from file

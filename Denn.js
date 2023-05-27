@@ -218,9 +218,10 @@ export class Denn {
      * @param {Integer} epochs Epochs
      * @param {Integer} batch_size The batch size 
      * @param {Float} error_threshold Error threshold below which early stopping triggers.
-     * @param {Boolean} verbose Verbosity
+     * @param {Boolean} backtrack Whether to backtrack in case mean squared error is greater than previous for batch
+     * @param {Boolean} verbose Verbosity (default: true)
      */
-    train(epochs, batch_size, error_threshold, verbose) {
+    train(epochs, batch_size, error_threshold, backtrack=false, verbose=true) {
         console.log("\nTRAINING - start");
         let X = this.input;
         let y = this.Y;
@@ -231,9 +232,8 @@ export class Denn {
 
         for (var i=0; i<epochs; i++) {
             let start_i = 0, stop_i = 0;
-            let batch_squared_errors = [], bse_size = [], batch_mean_error = 0, batch_mean_error_prev = 0;
+            let batch_mean_error = 0, batch_mean_error_prev = 0;
             let batch_cnt = 0;
-            let augmentCounter = 0;
 
             for (var x=0; x<X.length; x++) {
                 if (stop_i - start_i < batch_size) {
@@ -243,36 +243,25 @@ export class Denn {
                     batch_cnt++;
                     this.input = X.slice(start_i, stop_i);
                     this.Y = y.slice(start_i, stop_i);
-                    //console.log("X: "+X.length);
-                    //console.log("y: "+y.length);
 
-                    this.layers_backup = JSON.parse(JSON.stringify(this.layers));
+                    if (backtrack) this.layers_backup = JSON.parse(JSON.stringify(this.layers));
                     
                     if (i>0) this.dropout();
                     this.feedforward();
                     this.backprop(i, epochs);
                     if (i>0) this.dropoutRestore();
 
-                    batch_squared_errors = math.subtract(this.Y, this.output);
-                    batch_squared_errors.forEach(function(row, i, arr) { arr[i] = row.map(v => v*v); });
-                    bse_size = math.size(batch_squared_errors);
-                    batch_mean_error = math.divide(math.sum(batch_squared_errors), bse_size[0]*bse_size[1]);
+                    batch_mean_error = this.getMeanSquaredError();
 
                     if(batch_mean_error < batch_mean_error_prev) {
-                        for (augmentCounter; augmentCounter<3; augmentCounter++) {
+                        for (let augmentCounter = 0; augmentCounter < 3; augmentCounter++) {
                             //console.log("augmentCounter:"+augmentCounter);
                             if (i>0) this.dropout();
                             this.feedforward();
                             this.backprop(i, epochs);
                             if (i>0) this.dropoutRestore();
                         }
-                        augmentCounter=0;
-                    }else {
-                        //console.log("restoring layers");
-                        //this.layers = JSON.parse(JSON.stringify(this.layers_backup));
-                        //let res = this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error_prev);
-                        //X = res.X;
-                        //y = res.y;
+                    }else if (backtrack && i>1) {
                         batch_mean_error = this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error);
                         if(X.length<=100) break;
                     }
@@ -309,7 +298,7 @@ export class Denn {
         //console.log("backtracking");
         this.layers = JSON.parse(JSON.stringify(this.layers_backup));
 
-        let batch_squared_errors = [], bse_size = [], batch_mean_error = 0;
+        let batch_mean_error = 0;
 
         for (let cnt=0; cnt<(to-from); cnt++) {
             this.input = X.slice(from, from+1);
@@ -322,15 +311,12 @@ export class Denn {
             this.backprop(i, epochs);
             if (i>0) this.dropoutRestore();
 
-            batch_squared_errors = math.subtract(this.Y, this.output);
-            batch_squared_errors.forEach(function(row, i, arr) { arr[i] = row.map(v => v*v); });
-            bse_size = math.size(batch_squared_errors);
-            batch_mean_error = math.divide(math.sum(batch_squared_errors), bse_size[0]*bse_size[1]);
+            batch_mean_error = this.getMeanSquaredError();
 
             if (batch_mean_error > batch_mean_error_prev) {
                 //console.log("worse!");
                 this.layers = JSON.parse(JSON.stringify(this.layers_backup));
-                if (math.random(0, 1) > 0.9) {
+                if (math.random(0, 1) > 0.99) {
                     if (X.length > 100) {
                         X.splice(from, 1);
                         y.splice(from, 1);
@@ -344,30 +330,15 @@ export class Denn {
             from++;
         }
         return batch_mean_error;
-        /*
-        let trainSet = [];
-        if (X.length > 100) {
-            X.splice(from, 1);
-            y.splice(from, 1);
-            X = X.concat(X.splice(from, to - from-1));
-            y = y.concat(y.splice(from, to - from-1));
-        }*/
-        /*
-        //console.log("X: "+X.length);
-        for (let x=0; x<X.length; x++) {
-            trainSet.push(X[x].concat(y[x])); 
-        }
-        trainSet = DataSet.shuffle(trainSet);
-        //console.log("trainSet length="+trainSet.length);
-        let newX = []; let newY = [];
-        trainSet.forEach(row => {
-            newX.push(row.slice(0, X[0].length));
-            newY.push(row.slice(X[0].length));
-        });
-        X = newX;
-        y = newY;
-        */
-        return {X: X, y: y};
+    }
+
+    getMeanSquaredError() {
+        let batch_squared_errors = [], bse_size = [], batch_mean_error = 0;
+        batch_squared_errors = math.subtract(this.Y, this.output);
+        batch_squared_errors.forEach(function(row, i, arr) { arr[i] = row.map(v => v*v); });
+        bse_size = math.size(batch_squared_errors);
+        batch_mean_error = math.divide(math.sum(batch_squared_errors), bse_size[0]*bse_size[1]);
+        return batch_mean_error;
     }
 
     /**

@@ -45,7 +45,7 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
 
     // Train DNN
     let epochs = 100, batch_size = 1, error_threshold = 0.02, verbose = true;
-    nn.train(epochs, batch_size, error_threshold, verbose);
+    nn.train(epochs, batch_size, error_threshold, false, verbose);
 
     // Save model to a file
     let serialization_path = './nn-model.json';
@@ -55,7 +55,7 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
     var nn2 = Denn.deserialize(serialization_path);
 
     // Resume training
-    nn2.train(epochs*4, batch_size, error_threshold, verbose);
+    nn2.train(epochs*4, batch_size, error_threshold, false, verbose);
 
     // Test model
     nn2.test(train_test.test.X, train_test.test.Y_one_hot, true);
