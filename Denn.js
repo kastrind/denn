@@ -37,7 +37,7 @@ export class Denn {
         this.outActivationName = output_activation_function.name;
         this.outputEncoding = output_encoding === 'ONEHOT' || output_encoding === 'BINARY' ? output_encoding : 'NONE';
         this.encoding_to_label_map = encoding_to_label_map;
-        this.binaryOneConfidenceThreshold = 0.1;
+        this.binaryOneConfidenceThreshold = 0.5;
         this.initLayers();
     }
 

@@ -61,7 +61,7 @@ let binary_to_label_map = {};
 let datasetXY = DataSet.separateXY(trainSet, dimensions, 'ONEHOT', binary_to_label_map);
 
 let X = datasetXY.X;
-let Y = datasetXY.Y_one_hot;
+let Y = datasetXY.Y_encoded;
 
 let formation = [{"neurons": 64, "dropout": 0.0}];
 let learning_rate = 0.1, epochs = 300, batch_size = 50, error_threshold = 0.02, verbose = true;

@@ -128,7 +128,7 @@ export class DataSet {
      * @param {Array} data The imported data set.
      * @param {Integer} Y_index The index of the output feature (default: the index of the last feature element of a row).
      * @param {String} output_encoding 'ONEHOT', 'BINARY' or 'NONE representation of the output feature (default: 'NONE').
-     * @return {Object} object with X and Y feature arrays, and optionally Y_onehot or Y_bin for 'ONEHOT' or 'BINARY' encoding respectively.
+     * @return {Object} object with X and Y feature arrays, and optionally Y_encoded for 'ONEHOT' or 'BINARY' encoding.
      */
     static separateXY(data, Y_index, output_encoding='NONE', encoding_to_label_map) {
         if (!data || !data.length) return { X: [], Y: [] };
@@ -152,20 +152,20 @@ export class DataSet {
         if (output_encoding=='ONEHOT') {
             let labelsToOneHot = DataSet.labelsToOneHot(Object.keys(labels));
             DataSet.oneHotToLabels(labelsToOneHot, encoding_to_label_map);
-            let Y_one_hot = [];
+            let Y_encoded = [];
             Y.forEach((label) => {
-                Y_one_hot.push(labelsToOneHot[label]);
+                Y_encoded.push(labelsToOneHot[label]);
             });
-            return { X: X, Y: Y, Y_one_hot: Y_one_hot};
+            return { X: X, Y: Y, Y_encoded: Y_encoded};
 
         } else if (output_encoding=='BINARY') {
             let labelsToBinary = DataSet.labelsToBinary(Object.keys(labels));
             DataSet.binaryToLabels(labelsToBinary, encoding_to_label_map);
-            let Y_bin = [];
+            let Y_encoded = [];
             Y.forEach((label) => {
-                Y_bin.push(labelsToBinary[label]);
+                Y_encoded.push(labelsToBinary[label]);
             });
-            return { X: X, Y: Y, Y_bin: Y_bin};
+            return { X: X, Y: Y, Y_encoded: Y_encoded};
         }
         return { X: X, Y: Y};
     }
@@ -189,7 +189,7 @@ export class DataSet {
      * Separates the resulting dataset object to a train set and a test set.
      * @param {Object} data The dataset object with X, Y and optionally Y_onehot property.
      * @param {Float} test_p The approximate portion [0 - 1] of the data that will be kept as a test set.
-     * @return {Object} the dataset object separated to train and test sets: { train: { X: [], Y: [], Y_onehot|Y_bin: [] }, test: { X: [], Y: [], Y_onehot|Y_bin: [] } }
+     * @return {Object} the dataset object separated to train and test sets: { train: { X: [], Y: [], Y_encoded: [] }, test: { X: [], Y: [], Y_encoded: [] } }
      */
     static separateTrainTest(data, test_p) {
         if (!data || !data.hasOwnProperty('X') || !data.hasOwnProperty('Y')) return null;
@@ -205,19 +205,19 @@ export class DataSet {
             i++;
         }
         let tt = { train: { X: [], Y: [] }, test: { X: [], Y: [] } };
-        if (data.Y_one_hot) { tt.train["Y_one_hot"] = []; tt.test["Y_one_hot"] = []; }
-        else if (data.Y_bin) { tt.train["Y_bin"] = []; tt.test["Y_bin"] = []; }
+        if (data.Y_encoded) { tt.train["Y_encoded"] = []; tt.test["Y_encoded"] = []; }
+        //else if (data.Y_bin) { tt.train["Y_bin"] = []; tt.test["Y_bin"] = []; }
         data.X.forEach((elem, i) => {
             if (test_indexes.includes(i)) {
                 tt.test.X.push(data.X[i]);
                 tt.test.Y.push(data.Y[i]);
-                if (data.Y_one_hot) { tt.test.Y_one_hot.push(data.Y_one_hot[i]); }
-                else if (data.Y_bin) { tt.test.Y_bin.push(data.Y_bin[i]); }
+                if (data.Y_encoded) { tt.test.Y_encoded.push(data.Y_encoded[i]); }
+                //else if (data.Y_bin) { tt.test.Y_bin.push(data.Y_bin[i]); }
             }else {
                 tt.train.X.push(data.X[i]);
                 tt.train.Y.push(data.Y[i]);
-                if (data.Y_one_hot) { tt.train.Y_one_hot.push(data.Y_one_hot[i]); }
-                else if (data.Y_bin) { tt.train.Y_bin.push(data.Y_bin[i]); }
+                if (data.Y_encoded) { tt.train.Y_encoded.push(data.Y_encoded[i]); }
+                //else if (data.Y_bin) { tt.train.Y_bin.push(data.Y_bin[i]); }
             }
         });
         return tt;

@@ -33,7 +33,7 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
     let train_test = DataSet.separateTrainTest(datasetXY, 0.2);
 
     let X = train_test.train.X;
-    let Y = train_test.train.Y_one_hot;
+    let Y = train_test.train.Y_encoded;
 
     // This DNN will comprise one hidden layer of 5 neurons without drop-out probability
     let formation = [{"neurons": 5, "dropout": 0.0}];
@@ -58,7 +58,7 @@ This project implements a Deep Neural Network, a certain type of Neural Networks
     nn2.train(epochs*4, batch_size, error_threshold, false, verbose);
 
     // Test model
-    nn2.test(train_test.test.X, train_test.test.Y_one_hot, true);
+    nn2.test(train_test.test.X, train_test.test.Y_encoded, true);
 
 # :crown: Acknowledgements
 - [Machine Learning, Data Science and Deep Learning with Python - Frank Kane](https://www.udemy.com/course/data-science-and-machine-learning-with-python-hands-on/)
