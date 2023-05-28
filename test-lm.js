@@ -11,7 +11,7 @@ let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
 //let queries = ["mother pig", "house of straw", "huffed and puffed", "boil in the fireplace", "enter through the chimney"];
 //let queries = ["mother", "chimney", "boil"];
-let queries = ["cancel card", "open a new account", "close my account", "card delivery", "what is my credit score", "how is the delivery of my card goind", "why is my credit score so low", "when will my card arrive", "close account"];
+let queries = ["cancel card", "open a new account", "close my account", "card delivery", "what is my credit score", "how is the delivery of my card going", "why is my credit score so low", "when will my card arrive", "close account"];
 //let queries = ["owl", "dog", "cow"];
 //let queries = ["open account", "setup account", "cancel account"];
 queries.forEach(query => {
@@ -22,7 +22,7 @@ queries.forEach(query => {
   let answer;
   let answers = [];
   let prevQueryTerms = [];
-  let outputSum = math.zeros(Object.keys(nn.encoding_to_label_map).length)._data;
+  let outputSum = math.zeros(Object.keys(nn.encoding_to_label_map)[0].length)._data;
   let onehot_array = math.zeros(outputSum.length)._data;
   let max_i;
   queryTerms.forEach(term => {
