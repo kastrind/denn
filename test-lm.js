@@ -9,11 +9,8 @@ const embeddings = require(`./assets/${projectName}/embeddings.json`);
 // Load model from file
 let nn = Denn.deserialize(`./assets/${projectName}/lm.json`);
 
-//let queries = ["mother pig", "house of straw", "huffed and puffed", "boil in the fireplace", "enter through the chimney"];
-//let queries = ["mother", "chimney", "boil"];
-let queries = ["cancel card", "open a new account", "close my account", "card delivery", "what is my credit score", "how is the delivery of my card going", "why is my credit score so low", "when will my card arrive", "close account"];
-//let queries = ["owl", "dog", "cow"];
-//let queries = ["open account", "setup account", "cancel account"];
+//let queries = ["cancel card", "open a new account", "close my account", "card delivery", "what is my credit score", "how is the delivery of my card going", "why is my credit score so low", "when will my card arrive", "close account"];
+let queries = ["a new card for my needs"];
 queries.forEach(query => {
   console.log(`Query: ${query}`);
   query = query.toLowerCase();
