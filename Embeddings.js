@@ -37,7 +37,7 @@ export class Embeddings {
 
     this.maxFrequency = Math.max(...Object.values(this.dictionary));
 
-    this.dictionary = Object.fromEntries(Object.entries(this.dictionary).filter(([term, freq]) => freq < this.maxFrequency/1));
+    this.dictionary = Object.fromEntries(Object.entries(this.dictionary).filter(([term, freq]) => freq <= this.maxFrequency/1));
 
     sentences.forEach(sentence => 
     {
@@ -51,7 +51,7 @@ export class Embeddings {
             if (this.dictionary[terms[j+1]]) {
               let freqRatioX = this.dictionary[term] / this.maxFrequency;
               let freqRatioY = this.dictionary[terms[j+1]] / this.maxFrequency;
-              if (freqRatioX < 0.75 && freqRatioY < 0.75) {
+              if (freqRatioX <= 1 && freqRatioY <= 1) {
                 adjacencyPairsForward.push({x: term, y: terms[j+1]});
               }
             }
