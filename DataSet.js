@@ -244,7 +244,7 @@ export class DataSet {
         console.log("Cleansing corpus...");
         corpus = corpus.replace(/[^A-Za-z\s.;:!?]/g, ""); // sanitize
         corpus = corpus.replace(/[,]\s?/g, ' '); // ignore commas
-        corpus = corpus.replace(/[:]\s?/g, ' '); // part : part as one sentence
+        corpus = corpus.replace(/[:]\s?/g, ' '); // ignore colons
         corpus = corpus.replace(/[.;!?]\s?/g, '.'); // treat . ; ! ? as .
         corpus = corpus.replace(/\s+/g, ' '); // clear excess white-space
         return corpus;
