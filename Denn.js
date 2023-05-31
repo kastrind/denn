@@ -331,18 +331,16 @@ export class Denn {
             }
             from++;
         }
-        if (i>3) {
-            (Object.entries(error_diffs).sort(([,a],[,b]) => b-a )).forEach((entry, idx) => {
-                let from = entry[0];
-                let error_diff = entry[1];
-                if (error_diff > this.maxMeanErrorDiff) {
-                    console.log(`error diff: ${error_diff}, max: ${this.maxMeanErrorDiff}`);
-                    X.splice(from, 1);
-                    y.splice(from, 1);
-                    console.log("removed "+from+" at idx"+idx+"/"+Object.keys(error_diffs).length+" with error diff "+error_diff+", remaining "+X.length);
-                }
-            });
-        }
+        (Object.entries(error_diffs).sort(([,a],[,b]) => b-a )).forEach((entry, idx) => {
+            let from = entry[0];
+            let error_diff = entry[1];
+            if (error_diff > this.maxMeanErrorDiff) {
+                console.log(`error diff: ${error_diff}, max: ${this.maxMeanErrorDiff}`);
+                X.splice(from, 1);
+                y.splice(from, 1);
+                console.log("removed "+from+" at idx"+idx+"/"+Object.keys(error_diffs).length+" with error diff "+error_diff+", remaining "+X.length);
+            }
+        });
     }
 
     /**
