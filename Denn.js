@@ -220,11 +220,12 @@ export class Denn {
      * @param {Float} error_threshold Error threshold below which early stopping triggers.
      * @param {Boolean} backtrack Whether to backtrack in case mean squared error is greater than previous for batch
      * @param {Boolean} verbose Verbosity (default: true)
-     * @param {Integer} error_drop_iterations How many times to train a batch that lowered error (default: 3)
+     * @param {Integer} error_drop_iterations How many times to train a batch that lowered error (default: 5)
      */
-    train(epochs, batch_size, error_threshold, backtrack=false, verbose=true, error_drop_iterations=3) {
+    train(epochs, batch_size, error_threshold, backtrack=false, verbose=true, error_drop_iterations=5) {
         console.log("\nTRAINING - start");
-        this.maxErrorDiff = 0;
+        this.maxMeanErrorDiff = 0;
+        this.minMeanErrorDiff = 0;
         let X = this.input;
         let training_size = X.length;
         let y = this.Y;
@@ -235,7 +236,7 @@ export class Denn {
 
         for (var i=0; i<epochs; i++) {
             let start_i = 0, stop_i = 0;
-            let batch_mean_error = 0, batch_mean_error_prev = 0;
+            let batch_mean_error = 0, batch_mean_error_prev = 0, batch_error_diff = 0;
             let batch_cnt = 0;
 
             for (var x=0; x<X.length; x++) {
@@ -255,17 +256,15 @@ export class Denn {
                     if (i>0) this.dropoutRestore();
 
                     batch_mean_error = this.getMeanSquaredError();
+                    batch_error_diff = batch_mean_error - batch_mean_error_prev;
 
-                    if(error_drop_iterations > 0 && batch_mean_error < batch_mean_error_prev) {
-                        for (let augmentCounter = 0; augmentCounter < error_drop_iterations; augmentCounter++) {
-                            if (i>0) this.dropout();
-                            this.feedforward();
-                            this.backprop(i, epochs);
-                            if (i>0) this.dropoutRestore();
-                        }
-                    }else if (backtrack && i>1 && X.length > training_size/4) {
-                        this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error);
+                    if (backtrack && i>3 && X.length > training_size/4 && (batch_error_diff > this.maxMeanErrorDiff || batch_error_diff < this.minMeanErrorDiff*0.75)) {
+                        this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error, error_drop_iterations);
                     }
+                    this.maxMeanErrorDiff = i>2 && batch_error_diff > this.maxMeanErrorDiff ? batch_error_diff : this.maxMeanErrorDiff;
+                    this.minMeanErrorDiff = i>2 && batch_error_diff < this.minMeanErrorDiff ? batch_error_diff : this.minMeanErrorDiff;
+
+
                     batch_mean_error_prev = batch_mean_error;
                     epoch_mean_error += batch_mean_error;
 
@@ -295,11 +294,12 @@ export class Denn {
         console.log("TRAINING - end\n");
     }
 
-    backtrack(from, to, X, y, i, epochs, batch_mean_error_prev) {
+    backtrack(from, to, X, y, i, epochs, batch_mean_error_prev, error_drop_iterations) {
         //console.log("backtracking");
         this.layers = JSON.parse(JSON.stringify(this.layers_backup));
 
-        let batch_mean_error = 0, error_diff = 0;
+        let mean_error = 0, mean_error_prev = batch_mean_error_prev, error_diff = 0;
+        let error_diffs = {};
 
         for (let cnt=0; cnt<(to-from); cnt++) {
             this.input = X.slice(from, from+1);
@@ -312,21 +312,36 @@ export class Denn {
             this.backprop(i, epochs);
             if (i>0) this.dropoutRestore();
 
-            batch_mean_error = this.getMeanSquaredError();
-            error_diff = batch_mean_error - batch_mean_error_prev;
+            mean_error = this.getMeanSquaredError();
+            error_diff = mean_error - mean_error_prev;
 
-            if (error_diff > 0) {
-                this.maxErrorDiff = error_diff > this.maxErrorDiff ? error_diff : this.maxErrorDiff;
+            if (error_diff > this.maxMeanErrorDiff) {
+                error_diffs[from] = error_diff;
                 //console.log("worse!");
                 this.layers = JSON.parse(JSON.stringify(this.layers_backup));
-                if (math.random(0, 1) > 0.99) {
-                    X.splice(from, 1);
-                    y.splice(from, 1);
+            }else if (error_diff < this.minMeanErrorDiff*0.75) {
+                for (let augmentCounter = 0; augmentCounter < error_drop_iterations; augmentCounter++) {
+                    if (i>0) this.dropout();
+                    this.feedforward();
+                    this.backprop(i, epochs);
+                    if (i>0) this.dropoutRestore();
                 }
-            }else {
-              batch_mean_error_prev = batch_mean_error;
+                mean_error = this.getMeanSquaredError();
+                mean_error_prev = mean_error;
             }
             from++;
+        }
+        if (i>3) {
+            (Object.entries(error_diffs).sort(([,a],[,b]) => b-a )).forEach((entry, idx) => {
+                let from = entry[0];
+                let error_diff = entry[1];
+                if (error_diff > this.maxMeanErrorDiff) {
+                    console.log(`error diff: ${error_diff}, max: ${this.maxMeanErrorDiff}`);
+                    X.splice(from, 1);
+                    y.splice(from, 1);
+                    console.log("removed "+from+" at idx"+idx+"/"+Object.keys(error_diffs).length+" with error diff "+error_diff+", remaining "+X.length);
+                }
+            });
         }
     }
 
