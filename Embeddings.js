@@ -46,7 +46,7 @@ export class Embeddings {
       for (let i=0; i<terms.length; i++) {
         let term = terms[i];
         if (!this.dictionary[term]) continue;
-        for (let j=i; j<i+3; j++) {
+        for (let j=i; j<i+5; j++) {
           if (j+1 < terms.length) {
             if (this.dictionary[terms[j+1]]) {
               let freqRatioX = this.dictionary[term] / this.maxFrequency;

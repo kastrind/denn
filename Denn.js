@@ -258,7 +258,7 @@ export class Denn {
                     batch_mean_error = this.getMeanSquaredError();
                     batch_error_diff = batch_mean_error - batch_mean_error_prev;
 
-                    if (backtrack && i>3 && X.length > training_size/4 && (batch_error_diff > this.maxMeanErrorDiff || batch_error_diff < this.minMeanErrorDiff*0.75)) {
+                    if (backtrack && i>3 && X.length > training_size*0.25 && (batch_error_diff > this.maxMeanErrorDiff*0.5 || batch_error_diff < this.minMeanErrorDiff*0.5)) {
                         this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error, error_drop_iterations);
                     }
                     this.maxMeanErrorDiff = i>2 && batch_error_diff > this.maxMeanErrorDiff ? batch_error_diff : this.maxMeanErrorDiff;
@@ -331,6 +331,7 @@ export class Denn {
             }
             from++;
         }
+        /*
         (Object.entries(error_diffs).sort(([,a],[,b]) => b-a )).forEach((entry, idx) => {
             let from = entry[0];
             let error_diff = entry[1];
@@ -340,7 +341,7 @@ export class Denn {
                 y.splice(from, 1);
                 console.log("removed "+from+" at idx"+idx+"/"+Object.keys(error_diffs).length+" with error diff "+error_diff+", remaining "+X.length);
             }
-        });
+        });*/
     }
 
     /**

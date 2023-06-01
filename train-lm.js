@@ -43,10 +43,12 @@ sentences.forEach((sentence, sIdx) => {
   let terms = sentence.split(' ');
   let sentenceLabel = labels ? labels[sIdx] : 's'+sIdx;
   label2Sentences[sentenceLabel] = sentence;
+  let augmentTimes;
   for (let i=0; i<terms.length; i++) {
-    if (Math.round(embeddings.maxFrequency / embeddings.dictionary[terms[i]]) > 1) {
-      trainSet.push(embeddings.dictionaryEmbeddings[terms[i]].concat(sentenceLabel)); 
-    }
+      augmentTimes = Math.min(3, Math.floor(embeddings.maxFrequency/embeddings.dictionary[terms[i]])-1);
+      for (let c=0; c<augmentTimes; c++) {
+        trainSet.push(embeddings.dictionaryEmbeddings[terms[i]].concat(sentenceLabel));
+      } 
   }
 });
 
