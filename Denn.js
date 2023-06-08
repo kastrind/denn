@@ -258,7 +258,7 @@ export class Denn {
                     batch_mean_error = this.getMeanSquaredError();
                     batch_error_diff = batch_mean_error - batch_mean_error_prev;
 
-                    if (backtrack && i>3 && X.length > training_size*0.25 && (batch_error_diff > this.maxMeanErrorDiff*0.5 || batch_error_diff < this.minMeanErrorDiff*0.5)) {
+                    if (backtrack && i>3 && (batch_error_diff > this.maxMeanErrorDiff*0.5 || batch_error_diff < this.minMeanErrorDiff*0.5)) {
                         this.backtrack(start_i, stop_i, X, y, i, epochs, batch_mean_error, error_drop_iterations);
                     }
                     this.maxMeanErrorDiff = i>2 && batch_error_diff > this.maxMeanErrorDiff ? batch_error_diff : this.maxMeanErrorDiff;
@@ -317,7 +317,6 @@ export class Denn {
 
             if (error_diff > this.maxMeanErrorDiff) {
                 error_diffs[from] = error_diff;
-                //console.log("worse!");
                 this.layers = JSON.parse(JSON.stringify(this.layers_backup));
             }else if (error_diff < this.minMeanErrorDiff*0.75) {
                 for (let augmentCounter = 0; augmentCounter < error_drop_iterations; augmentCounter++) {
@@ -332,6 +331,7 @@ export class Denn {
             from++;
         }
         /*
+        commenting out - removing training data does not help
         (Object.entries(error_diffs).sort(([,a],[,b]) => b-a )).forEach((entry, idx) => {
             let from = entry[0];
             let error_diff = entry[1];

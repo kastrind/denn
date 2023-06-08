@@ -1,4 +1,3 @@
-import { match } from 'assert';
 import fs from 'fs';
 import * as math from 'mathjs';
 import { DataSet } from './DataSet';
@@ -6,12 +5,20 @@ import { Denn } from './Denn';
 
 export class Embeddings {
 
-  constructor(corpusPath, dimensions) {
+  /**
+   * @param {String} corpusPath path to corpus file
+   * @param {Number} dimensions cardinality of dimensions
+   * @param {Number} frequencyThreshold dictionary term frequency threshold 0-1 factor of max frequency above which term will be ignored (default: 1 - ignores none)
+   * @param {Number} adjacencyRange how many terms are considered adjacent (default: 5)
+   */
+  constructor(corpusPath, dimensions, frequencyThreshold=1, adjacencyRange=5) {
     this.dimensions = dimensions;
     this.dictionary = {};
     this.dictionaryVectors = {};
     this.adjacencyPairs = [];
     this.trainSet = [];
+    this.frequencyThreshold = frequencyThreshold;
+    this.adjacencyRange = adjacencyRange;
 
     // load and cleanse corpus
     let corpus = DataSet.loadCorpus(corpusPath);
@@ -37,7 +44,7 @@ export class Embeddings {
 
     this.maxFrequency = Math.max(...Object.values(this.dictionary));
 
-    this.dictionary = Object.fromEntries(Object.entries(this.dictionary).filter(([term, freq]) => freq <= this.maxFrequency/1));
+    this.dictionary = Object.fromEntries(Object.entries(this.dictionary).filter(([term, freq]) => freq <= this.maxFrequency * this.frequencyThreshold));
 
     sentences.forEach(sentence => 
     {
@@ -46,12 +53,12 @@ export class Embeddings {
       for (let i=0; i<terms.length; i++) {
         let term = terms[i];
         if (!this.dictionary[term]) continue;
-        for (let j=i; j<i+5; j++) {
+        for (let j = i; j < i + this.adjacencyRange; j++) {
           if (j+1 < terms.length) {
             if (this.dictionary[terms[j+1]]) {
               let freqRatioX = this.dictionary[term] / this.maxFrequency;
               let freqRatioY = this.dictionary[terms[j+1]] / this.maxFrequency;
-              if (freqRatioX <= 1 && freqRatioY <= 1) {
+              if (freqRatioX <= this.frequencyThreshold && freqRatioY <= this.frequencyThreshold) {
                 adjacencyPairsForward.push({x: term, y: terms[j+1]});
               }
             }
